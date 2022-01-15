@@ -22,12 +22,6 @@ class Room(models.Model):
     def __str__(self):
         return self.roomName
 
-title = models.CharField(verbose_name=_('Title (*)'), max_length=90, db_index=True)
-    body = models.TextField(verbose_name=_('Body'), blank=True)
-    author = models.ForeignKey(User, verbose_name=_('Author'), on_delete=models.CASCADE, related_name='articles')
-    status = models.CharField(_('Status (*)'), max_length=1, choices=STATUS_CHOICES, default='s', null=True, blank=True)
-    create_date = models.DateTimeField(verbose_name=_('Create Date'), auto_now_add=True)
-
 
 class Question(models.Model):
     questionId = models.UUIDField(primary_key=True, auto_created=True, default=uuid.uuid4, editable=False)
@@ -101,5 +95,3 @@ class Answer(models.Model):
 class AnswerQuestion(models.Model):
     answer = models.ForeignKey(Answer, on_delete=models.CASCADE)
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
-
-

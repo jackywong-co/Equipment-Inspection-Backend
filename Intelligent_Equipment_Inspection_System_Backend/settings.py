@@ -36,11 +36,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # app
-    # app
     'a_account.apps.AAccountConfig',
     'a_api.apps.AApiConfig',
     'a_form.apps.AFormConfig',
-
     # rest framework
     'rest_framework'
 
@@ -125,3 +123,5 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+AUTH_USER_MODEL = 'a_account.User'
