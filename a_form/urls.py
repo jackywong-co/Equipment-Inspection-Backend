@@ -1,6 +1,6 @@
 from django.urls import path, include
-from a_form.views import HomePageView
+from a_form.views import SignInView
 
 urlpatterns = [
-    path('', HomePageView.as_view(), name='home')
+    path('', SignInView.as_view(), name='home')
 ]
