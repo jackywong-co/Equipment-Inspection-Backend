@@ -2,7 +2,7 @@ from rest_framework import serializers
 from a_form.models import Room, Equipment
 
 
-class CreateEquipmentModelSerializer(serializers.ModelSerializer):
+class EquipmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Equipment
         fields = '__all__'

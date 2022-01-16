@@ -1,12 +1,19 @@
 from django.http import Http404
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from a_form.serializers import RoomSerializer, EquipmentSerializer, CreateEquipmentModelSerializer
+from a_form.serializers import RoomSerializer, EquipmentSerializer
 from a_form.models import Room, Equipment
+from a_account.serializers import UserSerializer
+from a_account.models import User
 from rest_framework import status
 
 
 # Create your views here.
+class UserView(APIView):
+    def get(self, request):
+        user = User.objects.all()
+        serializer = UserSerializer(user, many=True)
+        return Response(serializer.data)
 
 
 class RoomView(APIView):
@@ -56,7 +63,7 @@ class EquipmentView(APIView):
         return Response(serializer.data)
 
     def post(self, request):
-        serializer = CreateEquipmentModelSerializer(data=request.data)
+        serializer = EquipmentSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
