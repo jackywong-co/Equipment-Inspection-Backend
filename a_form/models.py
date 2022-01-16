@@ -38,11 +38,10 @@ class Question(models.Model):
 class Equipment(models.Model):
     equipmentId = models.UUIDField(primary_key=True, auto_created=True, default=uuid.uuid4, editable=False)
     equipmentName = models.CharField(max_length=30)
+    equipmentCode = models.CharField(max_length=30, blank=True, null=True)
     room = models.ForeignKey(Room, related_name='equipments', on_delete=models.CASCADE)
-
     ThisInspectionOn = models.DateTimeField(auto_now=True)
     NextInspectionOn = models.DateTimeField(auto_now=True)
-
     status = models.SmallIntegerField(choices=status, default=1)
     createdAt = models.DateTimeField(auto_now_add=True)
     modifiedAt = models.DateTimeField(auto_now=True)
