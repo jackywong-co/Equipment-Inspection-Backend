@@ -1,4 +1,5 @@
 from django.http import Http404
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from a_form.serializers import RoomSerializer, EquipmentSerializer
@@ -10,6 +11,8 @@ from rest_framework import status
 
 # Create your views here.
 class UserView(APIView):
+    permission_classes = (IsAuthenticated,)
+
     def get(self, request):
         user = User.objects.all()
         serializer = UserSerializer(user, many=True)
@@ -17,6 +20,8 @@ class UserView(APIView):
 
 
 class RoomView(APIView):
+    permission_classes = (IsAuthenticated,)
+
     def get(self, request):
         room = Room.objects.all()
         serializer = RoomSerializer(room, many=True)
@@ -31,6 +36,8 @@ class RoomView(APIView):
 
 
 class RoomDetailView(APIView):
+    permission_classes = (IsAuthenticated,)
+
     def get_object(self, pk):
         try:
             return Room.objects.get(pk=pk)
@@ -57,6 +64,8 @@ class RoomDetailView(APIView):
 
 
 class EquipmentView(APIView):
+    permission_classes = (IsAuthenticated,)
+
     def get(self, request):
         equipment = Equipment.objects.all()
         serializer = EquipmentSerializer(equipment, many=True)
@@ -68,4 +77,3 @@ class EquipmentView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-

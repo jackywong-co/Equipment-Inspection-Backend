@@ -6,9 +6,34 @@
 
 {% block style %}
 
+{% endblock %}
+{% block script %}
+
+
+    {#    get access key#}
+    var getAccessKey = window.sessionStorage.getItem("accessKey");
+    console.log(getAccessKey);
+
+    const url = 'http://127.0.0.1:8000/api/room/'
+    const request = new XMLHttpRequest();
+    request.open('GET', url, true);
+    request.setRequestHeader('Content-Type', 'application/json');
+    request.setRequestHeader('Authorization','Bearer ' + getAccessKey);
+    request.onload = function(){
+    console.log(request.responseText);
+    }
+    request.send();
+
+
+
+
 
 {% endblock %}
+
+
+
 {% block body %}
 
+    <div id="access"></div>
 {% endblock %}
 

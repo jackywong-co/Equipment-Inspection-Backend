@@ -42,10 +42,46 @@
     }
 
 {% endblock %}
+
+{% block script %}
+
+
+    function setToken(username, password){
+
+    const url = 'http://127.0.0.1:8000/api/token/'
+    const json = { "username": username, "password": password };
+    const request = new XMLHttpRequest();
+    request.open('POST', url, true);
+    request.setRequestHeader('Content-Type', 'application/json');
+    request.onload = function(){
+    console.log(request.responseText);
+    var obj = JSON.parse(request.responseText);
+    {#save access key in session storage#}
+    var setAccessKey = window.sessionStorage.setItem("accessKey", obj.access);
+    }
+    request.send(JSON.stringify(json));
+    }
+
+    function onSubmit(){
+    var username = document.getElementsByName("username");
+    var password = document.getElementsByName("password");
+
+    setToken(username,password);
+    console.log(window.sessionStorage.getItem("accessKey"));
+
+
+
+    }
+
+
+{% endblock %}
+
 {% block body %}
 
+
+
     <main class="text-center form-signin">
-        <form action="/login/" method="POST">
+        <form onSubmit="JavaScript:onSubmit()">
 
             <h1 class="h3 mb-3 fw-normal">Sign in</h1>
 
@@ -59,10 +95,9 @@
                 <label for="floatingPassword">Password</label>
             </div>
 
-            <button class="w-100 btn btn-lg btn-primary" type="submit">Sign in</button>
+            <button class="w-100 btn btn-lg btn-primary" type="submit" name="Submit">Sign in</button>
 
         </form>
     </main>
 
 {% endblock %}
-

@@ -6,3 +6,7 @@ from django.views.generic import TemplateView
 
 class SignInView(TemplateView):
     template_name = "login.html"
+
+
+class DashboardView(TemplateView):
+    template_name = "dashboard.html"
