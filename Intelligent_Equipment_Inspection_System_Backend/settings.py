@@ -44,11 +44,6 @@ INSTALLED_APPS = [
     # rest framework
     'rest_framework',
     'rest_framework_simplejwt',
-<<<<<<< HEAD
-
-=======
->>>>>>> parent of 17992b0 (no message)
-
 ]
 
 MIDDLEWARE = [
