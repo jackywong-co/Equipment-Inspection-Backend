@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/4.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
-from datetime import timedelta
+
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -42,8 +42,12 @@ INSTALLED_APPS = [
     'a_api.apps.AApiConfig',
     'a_form.apps.AFormConfig',
     # rest framework
+<<<<<<< HEAD
     'rest_framework',
     'rest_framework_simplejwt',
+=======
+    'rest_framework'
+>>>>>>> parent of 148b667 (jwt)
 
 ]
 
@@ -129,6 +133,7 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'a_account.User'
+<<<<<<< HEAD
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
@@ -141,3 +146,5 @@ REST_FRAMEWORK = {
 
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS: True
+=======
+>>>>>>> parent of 148b667 (jwt)

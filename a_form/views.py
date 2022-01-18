@@ -90,9 +90,14 @@ class FormView(APIView):
 
 
 
+<<<<<<< HEAD
 class SignInView(TemplateView):
     template_name = "login.html"
 
 
 class DashboardView(TemplateView):
     template_name = "dashboard.html"
+=======
+class HomePageView(TemplateView):
+    template_name = "index.html"
+>>>>>>> parent of 148b667 (jwt)

@@ -1,7 +1,12 @@
+<<<<<<< HEAD
 from django.urls import path, include
 
 from a_form.views import RoomView, RoomDetailView, EquipmentView, UserView, FormView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
+=======
+from django.urls import path
+from a_api.views import RoomView, RoomDetailView, EquipmentView, UserView
+>>>>>>> parent of 148b667 (jwt)
 
 urlpatterns = [
     path('auth/', include('a_account.urls')),
@@ -10,6 +15,7 @@ urlpatterns = [
     path('room/', RoomView.as_view()),
     path('room/<str:pk>', RoomDetailView.as_view()),
     path('equipment/', EquipmentView.as_view()),
+<<<<<<< HEAD
 
     path('form/', FormView.as_view()),
     # path('test/', ExampleView.as_view()),
@@ -20,4 +26,6 @@ urlpatterns = [
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('token/verify/', TokenVerifyView.as_view(), name='token_verify'),
+=======
+>>>>>>> parent of 148b667 (jwt)
 ]
