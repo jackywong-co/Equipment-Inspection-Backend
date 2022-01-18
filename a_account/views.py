@@ -1,10 +1,13 @@
-from django.contrib.auth import authenticate
-from django.shortcuts import render
+import datetime
 
-# Create your views here.
-from rest_framework import response, status
+import jwt
+from django.conf import settings
+from rest_framework.response import Response
+from rest_framework import status
 from rest_framework.views import APIView
-from a_account.serializers import LoginSerializer, UserSerializer
+from rest_framework.exceptions import AuthenticationFailed
+from a_account.models import User
+from a_account.serializers import UserSerializer
 
 
 class RegisterView(APIView):
@@ -12,21 +15,56 @@ class RegisterView(APIView):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return response.Response(serializer.data, status=status.HTTP_201_CREATED)
-        return response.Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class LoginView(APIView):
-    serializer_class = LoginSerializer
-
     def post(self, request):
-        username = request.data.get('username', None)
-        password = request.data.get('password', None)
+        username = request.data['username']
+        password = request.data['password']
+        user = User.objects.filter(username=username).first()
+        if user is None:
+            raise AuthenticationFailed('User not found!')
+        if not user.check_password(password):
+            raise AuthenticationFailed('Incorrect password!')
 
-        user = authenticate(username=username, password=password)
+        payload = {
+            'id': str(user.id),
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=60),
+            'iat': datetime.datetime.utcnow()
+        }
+        token = jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256')
 
-        if user:
-            serializer = self.serializer_class(user)
-            return response.Response(serializer.data, status=status.HTTP_200_OK)
-        return response.Response({'message': "Invalid credentials, try again"}, status=status.HTTP_401_UNAUTHORIZED)
+        response = Response()
+        response.set_cookie(key='token', value=token, httponly=True)
+        response.data = {
+            'token': token,
+            'message': 'success'
+        }
+
+        return response
+
+
+class UserView(APIView):
+    def get(self, request):
+        token = request.COOKIES.get('token')
+        if not token:
+            raise AuthenticationFailed('Unauthenticated')
+        try:
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed('Token Expired')
+        user = User.objects.filter(id=payload['id']).first()
+        serializer = UserSerializer(user)
+        return Response(serializer.data)
+
+
+class LogoutView(APIView):
+    def post(self, request):
+        response = Response()
+        response.delete_cookie('token')
+        response.data = {
+            'message': 'logout success'
+        }
+        return response
