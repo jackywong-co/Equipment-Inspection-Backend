@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 
+=======
+>>>>>>> parent of 17992b0 (no message)
 from django.urls import path, include
 
 from a_form.views import RoomView, RoomDetailView, EquipmentView, UserView, FormView
@@ -11,7 +14,10 @@ urlpatterns = [
     path('room/', RoomView.as_view()),
     path('room/<str:pk>', RoomDetailView.as_view()),
     path('equipment/', EquipmentView.as_view()),
+<<<<<<< HEAD
 
+=======
+>>>>>>> parent of 17992b0 (no message)
 
     path('form/', FormView.as_view()),
     # path('test/', ExampleView.as_view()),
@@ -22,5 +28,9 @@ urlpatterns = [
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('token/verify/', TokenVerifyView.as_view(), name='token_verify'),
+<<<<<<< HEAD
 
 ]
+=======
+]
+>>>>>>> parent of 17992b0 (no message)
