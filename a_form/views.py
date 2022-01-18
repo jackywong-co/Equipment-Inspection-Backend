@@ -64,6 +64,7 @@ class RoomDetailView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+
 class EquipmentView(APIView):
     permission_classes = (IsAuthenticated,)
 
@@ -90,14 +91,10 @@ class FormView(APIView):
 
 
 
-<<<<<<< HEAD
+
 class SignInView(TemplateView):
     template_name = "login.html"
 
 
 class DashboardView(TemplateView):
     template_name = "dashboard.html"
-=======
-class HomePageView(TemplateView):
-    template_name = "index.html"
->>>>>>> parent of 148b667 (jwt)

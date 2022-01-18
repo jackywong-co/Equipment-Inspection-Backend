@@ -1,10 +1,6 @@
 import uuid
-from datetime import datetime, timedelta
-
-from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-import jwt
 
 
 class User(AbstractUser):
