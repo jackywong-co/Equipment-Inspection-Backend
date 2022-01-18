@@ -1,6 +1,6 @@
 from django.urls import path, include
 
-from a_api.views import RoomView, RoomDetailView, EquipmentView, UserView
+from a_form.views import RoomView, RoomDetailView, EquipmentView, UserView, FormView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
 
 urlpatterns = [
@@ -10,6 +10,8 @@ urlpatterns = [
     path('room/', RoomView.as_view()),
     path('room/<str:pk>', RoomDetailView.as_view()),
     path('equipment/', EquipmentView.as_view()),
+
+    path('form/', FormView.as_view()),
     # path('test/', ExampleView.as_view()),
 
     # path('login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),

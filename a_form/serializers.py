@@ -43,3 +43,9 @@ class RoomSerializer(serializers.Serializer):
         instance.status = validated_data.get('status', instance.status)
         instance.save()
         return instance
+
+
+class FormSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Equipment
+        fields = '__all__'
