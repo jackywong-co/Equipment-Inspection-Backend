@@ -91,10 +91,7 @@ class FormView(APIView):
 
 
 
-<<<<<<< HEAD
 
-=======
->>>>>>> parent of 17992b0 (no message)
 class SignInView(TemplateView):
     template_name = "login.html"
 
