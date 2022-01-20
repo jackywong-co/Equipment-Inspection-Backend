@@ -6,3 +6,4 @@ Login API
 
 
 - https://gist.github.com/WayneSan/7412e1ded25f8192b394
+- https://stackoverflow.com/questions/67885164/django-rest-framework-pyjwt-token-invalid-header-padding
