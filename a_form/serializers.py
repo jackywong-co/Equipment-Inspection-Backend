@@ -1,5 +1,8 @@
 from rest_framework import serializers
-from a_form.models import Room, Equipment
+from rest_framework.relations import PrimaryKeyRelatedField
+
+from a_account.models import User
+from a_form.models import Room, Equipment, Form
 
 
 class EquipmentSerializer(serializers.ModelSerializer):
@@ -45,7 +48,27 @@ class RoomSerializer(serializers.Serializer):
         return instance
 
 
-class FormSerializer(serializers.ModelSerializer):
+class FormSerializer(serializers.Serializer):
+    formId = serializers.UUIDField(required=False)
+    formName = serializers.CharField()
+    createdBy = PrimaryKeyRelatedField(queryset=User.objects.all())
+    location = serializers.CharField()
+    equipments = serializers.SlugRelatedField(many=True, read_only=True, slug_field='equipmentName')
+
+    status = serializers.CharField(required=False)
+    createdAt = serializers.DateTimeField(required=False)
+    modifiedAt = serializers.DateTimeField(required=False)
+
+    def create(self, validated_data):
+        return Form.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        instance.roomName = validated_data.get('roomName', instance.roomName)
+        instance.location = validated_data.get('location', instance.location)
+        instance.status = validated_data.get('status', instance.status)
+        instance.save()
+        return instance
+
     class Meta:
-        model = Equipment
+        model = Form
         fields = '__all__'
