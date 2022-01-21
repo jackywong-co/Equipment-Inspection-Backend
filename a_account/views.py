@@ -1,9 +1,26 @@
-
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
-
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, TokenRefreshSerializer, \
+    TokenVerifySerializer
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
 from a_account.serializers import UserSerializer
+
+
+class LoginView(TokenObtainPairView):
+    permission_classes = [AllowAny]
+    serializer_class = TokenObtainPairSerializer
+
+
+class RefreshView(TokenRefreshView):
+    permission_classes = [AllowAny]
+    serializer_class = TokenRefreshSerializer
+
+
+class VerifyView(TokenVerifyView):
+    permission_classes = [AllowAny]
+    serializer_class = TokenVerifySerializer
 
 
 class RegisterView(APIView):
