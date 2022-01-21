@@ -2,7 +2,8 @@ from rest_framework import serializers
 from rest_framework.relations import PrimaryKeyRelatedField
 
 from a_account.models import User
-from a_form.models import Room, Equipment, Form
+from a_account.serializers import UserSerializer
+from a_form.models import Room, Equipment, Form, Question
 
 
 class EquipmentSerializer(serializers.ModelSerializer):
@@ -48,7 +49,23 @@ class RoomSerializer(serializers.Serializer):
         return instance
 
 
+class QuestionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Question
+        fields = '__all__'
+
+
 class FormSerializer(serializers.ModelSerializer):
+    equipments = EquipmentSerializer(many=True)
+    questions = QuestionSerializer(many=True)
+
+    def create(self, validated_data):
+
+        equipment_data = validated_data.pop('equipment')
+        form = Form.objects.create(**validated_data)
+        Equipment.objects.create(form=form, **equipment_data)
+        return form
+
     class Meta:
         model = Form
-        fields = '__all__'
+        fields = ['formName', 'createdBy', 'equipments', 'questions']
