@@ -119,8 +119,6 @@ class FormView(APIView):
         return Response(serializer.data)
 
 
-
-
 class SignInView(TemplateView):
     template_name = "login.html"
 

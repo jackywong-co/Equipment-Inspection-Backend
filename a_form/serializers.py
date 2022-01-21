@@ -32,7 +32,7 @@ class RoomSerializer(serializers.Serializer):
     roomId = serializers.UUIDField(required=False)
     roomName = serializers.CharField()
     location = serializers.CharField()
-    equipments = serializers.SlugRelatedField(many=True, read_only=True, slug_field='equipmentName')
+    equipments = EquipmentSerializer(many=True, required=False)
 
     status = serializers.CharField(required=False)
     createdAt = serializers.DateTimeField(required=False)
@@ -60,7 +60,6 @@ class FormSerializer(serializers.ModelSerializer):
     questions = QuestionSerializer(many=True)
 
     def create(self, validated_data):
-
         equipment_data = validated_data.pop('equipment')
         form = Form.objects.create(**validated_data)
         Equipment.objects.create(form=form, **equipment_data)
