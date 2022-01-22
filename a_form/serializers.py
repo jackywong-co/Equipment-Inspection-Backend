@@ -3,7 +3,7 @@ from rest_framework.relations import PrimaryKeyRelatedField
 
 from a_account.models import User
 from a_account.serializers import UserSerializer
-from a_form.models import Room, Equipment, Form, Question
+from a_form.models import Room, Equipment, Form, Question, FormEquipment, FormQuestion
 
 
 class EquipmentSerializer(serializers.ModelSerializer):
@@ -12,41 +12,30 @@ class EquipmentSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class EquipmentSerializer(serializers.Serializer):
-    equipmentId = serializers.UUIDField(required=False)
-    equipmentName = serializers.CharField()
-    equipmentCode = serializers.CharField(required=False)
-    # roomId = serializers.SlugRelatedField(many=True,   read_only=True, slug_field='room')
-
-    ThisInspectionOn = serializers.DateTimeField(required=False)
-    NextInspectionOn = serializers.DateTimeField(required=False)
-    status = serializers.CharField(required=False)
-    createdAt = serializers.DateTimeField(required=False)
-    modifiedAt = serializers.DateTimeField(required=False)
-
-    def create(self, validated_data):
-        return Equipment.objects.create(**validated_data)
-
-
-class RoomSerializer(serializers.Serializer):
-    roomId = serializers.UUIDField(required=False)
-    roomName = serializers.CharField()
-    location = serializers.CharField()
-    equipments = EquipmentSerializer(many=True, required=False)
-
-    status = serializers.CharField(required=False)
-    createdAt = serializers.DateTimeField(required=False)
-    modifiedAt = serializers.DateTimeField(required=False)
+class RoomSerializer(serializers.ModelSerializer):
+    # id = serializers.UUIDField(required=False)
+    # room_name = serializers.CharField()
+    #
+    # location = serializers.CharField()
+    # equipments = EquipmentSerializer(many=True, required=False)
+    #
+    # status = serializers.CharField(required=False)
+    # created_at = serializers.DateTimeField(required=False)
+    # modified_at = serializers.DateTimeField(required=False)
 
     def create(self, validated_data):
         return Room.objects.create(**validated_data)
 
     def update(self, instance, validated_data):
-        instance.roomName = validated_data.get('roomName', instance.roomName)
+        instance.room_name = validated_data.get('room_name', instance.room_name)
         instance.location = validated_data.get('location', instance.location)
         instance.status = validated_data.get('status', instance.status)
         instance.save()
         return instance
+
+    class Meta:
+        model = Room
+        fields = '__all__'
 
 
 class QuestionSerializer(serializers.ModelSerializer):
@@ -55,16 +44,27 @@ class QuestionSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class FormSerializer(serializers.ModelSerializer):
-    equipments = EquipmentSerializer(many=True)
-    questions = QuestionSerializer(many=True)
+class FormQuestionSerializer(serializers.Serializer):
+    questionId = serializers.UUIDField()
+    formId = serializers.UUIDField()
 
     def create(self, validated_data):
-        equipment_data = validated_data.pop('equipment')
-        form = Form.objects.create(**validated_data)
-        Equipment.objects.create(form=form, **equipment_data)
-        return form
+        return FormQuestion.objects.create(**validated_data)
+
+
+class FormSerializer(serializers.ModelSerializer):
+    # equipments = FormEquipmentSerializer(many=True, required=False)
+    # questions = FormQuestionSerializer(many=True, required=False)
+
+    def create(self, validated_data):
+        return Form.objects.create(**validated_data)
 
     class Meta:
         model = Form
-        fields = ['formName', 'createdBy', 'equipments', 'questions']
+        fields = ['formId', 'formName', 'createdBy', 'equipments', 'questions']
+
+
+class FormEquipmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FormEquipment
+        fields = '__all__'
