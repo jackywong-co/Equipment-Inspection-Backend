@@ -122,10 +122,10 @@ class FormView(APIView):
         return Response(serializer.data)
 
     def post(self, request):
-        formName = request.data['formName']
-        user = User.objects.get(id=request.data['createdBy'])
-        createdBy = user
-        form = Form.objects.create(formName=formName, createdBy=createdBy)
+        form_name = request.data['form_name']
+        user = User.objects.get(id=request.data['created_by'])
+        created_by = user
+        form = Form.objects.create(form_name=form_name, created_by=created_by)
 
         form.save()
 
@@ -133,14 +133,14 @@ class FormView(APIView):
         questions = request.data['questions']
 
         # print(formName)
-        formId = Form.objects.get(formId=form.formId)
+        form_id = Form.objects.get(id=form.id)
         for equipment in equipments:
-            equipmentId = Equipment.objects.get(equipmentId=equipment)
-            form_equipment = FormEquipment.objects.create(form=formId, equipment=equipmentId)
+            equipment_id = Equipment.objects.get(id=equipment)
+            form_equipment = FormEquipment.objects.create(form=form_id, equipment=equipment_id)
             form_equipment.save()
         for questions in questions:
-            questionId = Question.objects.get(questionId=questions)
-            form_question = FormQuestion.objects.create(form=formId, question=questionId)
+            question_id = Question.objects.get(id=questions)
+            form_question = FormQuestion.objects.create(form=form_id, question=question_id)
             form_question.save()
 
         return Response({"message": "form created"})
@@ -223,6 +223,13 @@ class QuestionView(APIView):
         question = Question.objects.all()
         serializer = QuestionSerializer(question, many=True)
         return Response(serializer.data)
+
+    def post(self, request):
+        serializer = QuestionSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class SignInView(TemplateView):

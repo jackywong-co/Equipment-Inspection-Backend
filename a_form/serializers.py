@@ -13,16 +13,6 @@ class EquipmentSerializer(serializers.ModelSerializer):
 
 
 class RoomSerializer(serializers.ModelSerializer):
-    # id = serializers.UUIDField(required=False)
-    # room_name = serializers.CharField()
-    #
-    # location = serializers.CharField()
-    # equipments = EquipmentSerializer(many=True, required=False)
-    #
-    # status = serializers.CharField(required=False)
-    # created_at = serializers.DateTimeField(required=False)
-    # modified_at = serializers.DateTimeField(required=False)
-
     def create(self, validated_data):
         return Room.objects.create(**validated_data)
 
@@ -61,7 +51,7 @@ class FormSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Form
-        fields = ['formId', 'formName', 'createdBy', 'equipments', 'questions']
+        fields = '__all__'
 
 
 class FormEquipmentSerializer(serializers.ModelSerializer):
