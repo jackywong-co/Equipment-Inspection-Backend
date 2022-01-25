@@ -3,9 +3,9 @@ from django.views.generic import TemplateView
 from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from a_form.serializers import RoomSerializer, EquipmentSerializer, FormSerializer, QuestionSerializer, \
-    FormEquipmentSerializer, FormQuestionSerializer
-from a_form.models import Room, Equipment, Form, FormEquipment, Question, FormQuestion
+from a_form.serializers import (RoomSerializer, EquipmentSerializer, FormSerializer, QuestionSerializer,
+                                AnswerSerializer, FormEquipmentSerializer, FormQuestionSerializer)
+from a_form.models import (Room, Equipment, Form, Question, Answer, FormEquipment, FormQuestion)
 from a_account.serializers import UserSerializer
 from a_account.models import User
 from rest_framework import status
@@ -18,14 +18,6 @@ class UserView(APIView):
     def get(self, request):
         user = User.objects.all()
         serializer = UserSerializer(user, many=True)
-        return Response(serializer.data)
-
-
-class RoomReadOnlyView(APIView):
-
-    def get(self, request):
-        room = Room.objects.all()
-        serializer = RoomSerializer(room, many=True)
         return Response(serializer.data)
 
 
@@ -43,19 +35,6 @@ class RoomView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class RoomDetailReadOnlyView(APIView):
-    def get_object(self, pk):
-        try:
-            return Room.objects.get(pk=pk)
-        except Room.DoesNotExist:
-            raise Http404
-
-    def get(self, request, pk):
-        room = self.get_object(pk)
-        serializer = RoomSerializer(room)
-        return Response(serializer.data)
 
 
 class RoomDetailView(APIView):
@@ -86,13 +65,6 @@ class RoomDetailView(APIView):
         return Response({"message": "deleted"}, status=status.HTTP_204_NO_CONTENT)
 
 
-class EquipmentReadOnlyView(APIView):
-    def get(self, request):
-        equipment = Equipment.objects.all()
-        serializer = EquipmentSerializer(equipment, many=True)
-        return Response(serializer.data)
-
-
 class EquipmentView(APIView):
     permission_classes = [IsAdminUser]
 
@@ -109,32 +81,7 @@ class EquipmentView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class EquipmentDetailReadyOnlyView(APIView):
-    def get_object(self, pk):
-        try:
-            return Equipment.objects.get(pk=pk)
-        except Equipment.DoesNotExist:
-            raise Http404
-
-    def get(self, request, pk):
-        equipment = self.get_object(pk)
-        serializer = EquipmentSerializer(equipment)
-        equipment_obj = serializer.data
-
-        forms_arr = []
-        form_equipments = FormEquipment.objects.filter(equipment=equipment)
-
-        for form_equipment in form_equipments:
-            serializer = FormSerializer(form_equipment.form)
-            forms_arr.append(serializer.data)
-
-        equipment_obj['forms'] = forms_arr
-
-        return Response(equipment_obj)
-
-
 class EquipmentDetailView(APIView):
-    permission_classes = [IsAdminUser]
 
     def get_object(self, pk):
         try:
@@ -172,16 +119,7 @@ class EquipmentDetailView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class FormReadOnlyView(APIView):
-
-    def get(self, request):
-        form = Form.objects.all()
-        serializer = FormSerializer(form, many=True)
-        return Response(serializer.data)
-
-
 class FormView(APIView):
-    permission_classes = [IsAdminUser]
 
     def get(self, request):
         form = Form.objects.all()
@@ -213,22 +151,7 @@ class FormView(APIView):
         return Response({"message": "form created"})
 
 
-class FormDetailReadOnlyView(APIView):
-
-    def get_object(self, pk):
-        try:
-            return Form.objects.get(pk=pk)
-        except Form.DoesNotExist:
-            raise Http404
-
-    def get(self, request, pk):
-        form = self.get_object(pk)
-        serializer = FormSerializer(form)
-        return Response(serializer.data)
-
-
 class FormDetailView(APIView):
-    permission_classes = [IsAdminUser]
 
     def get_object(self, pk):
         try:
@@ -256,7 +179,6 @@ class FormDetailView(APIView):
 
 
 class FormEquipmentView(APIView):
-    permission_classes = [IsAdminUser]
 
     def get(self, request):
         form_equipment = FormEquipment.objects.all()
@@ -265,7 +187,6 @@ class FormEquipmentView(APIView):
 
 
 class FormEquipmentDetailView(APIView):
-    permission_classes = [IsAdminUser]
 
     def get_object(self, pk):
         try:
@@ -280,7 +201,6 @@ class FormEquipmentDetailView(APIView):
 
 
 class FormQuestionView(APIView):
-    permission_classes = [IsAdminUser]
 
     def get(self, request):
         form_question = FormQuestion.objects.all()
@@ -289,7 +209,6 @@ class FormQuestionView(APIView):
 
 
 class FormQuestionDetailView(APIView):
-    permission_classes = [IsAdminUser]
 
     def get_object(self, pk):
         try:
@@ -303,16 +222,7 @@ class FormQuestionDetailView(APIView):
         return Response(serializer.data)
 
 
-class QuestionReadOnlyView(APIView):
-
-    def get(self, request):
-        question = Question.objects.all()
-        serializer = QuestionSerializer(question, many=True)
-        return Response(serializer.data)
-
-
 class QuestionView(APIView):
-    permission_classes = [IsAdminUser]
 
     def get(self, request):
         question = Question.objects.all()
@@ -327,14 +237,70 @@ class QuestionView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+class QuestionDetailView(APIView):
+
+    def get_object(self, pk):
+        try:
+            return Question.objects.get(pk=pk)
+        except Question.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk):
+        question = self.get_object(pk)
+        serializer = QuestionSerializer(question)
+        return Response(serializer.data)
+
+    def put(self, request, pk):
+        question = self.get_object(pk)
+        serializer = QuestionSerializer(question, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        question = self.get_object(pk)
+        question.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
 class AnswerView(APIView):
+
     def get(self, request):
-        pass
+        answer = Answer.objects.all()
+        serializer = AnswerSerializer(answer, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        serializer = AnswerSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class SignInView(TemplateView):
-    template_name = "login.html"
+class AnswerDetailView(APIView):
 
+    def get_object(self, pk):
+        try:
+            return Answer.objects.get(pk=pk)
+        except Answer.DoesNotExist:
+            raise Http404
 
-class DashboardView(TemplateView):
-    template_name = "dashboard.html"
+    def get(self, request, pk):
+        answer = self.get_object(pk)
+        serializer = AnswerSerializer(answer)
+        return Response(serializer.data)
+
+    def put(self, request, pk):
+        answer = self.get_object(pk)
+        serializer = AnswerSerializer(answer, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        answer = self.get_object(pk)
+        answer.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

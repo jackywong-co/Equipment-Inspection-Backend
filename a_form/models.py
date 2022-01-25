@@ -71,14 +71,14 @@ class Form(models.Model):
 
 class FormEquipment(models.Model):
     id = models.UUIDField(primary_key=True, auto_created=True, default=uuid.uuid4, editable=False)
-    form = models.ForeignKey(Form, related_name='forms', on_delete=models.CASCADE)
-    equipment = models.ForeignKey(Equipment, related_name='equipments', on_delete=models.CASCADE)
+    forms = models.ForeignKey(Form, related_name='forms', on_delete=models.CASCADE)
+    equipments = models.ForeignKey(Equipment, related_name='equipments', on_delete=models.CASCADE)
 
 
 class FormQuestion(models.Model):
     id = models.UUIDField(primary_key=True, auto_created=True, default=uuid.uuid4, editable=False)
-    form = models.ForeignKey(Form, on_delete=models.CASCADE)
-    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    forms = models.ForeignKey(Form, on_delete=models.CASCADE)
+    questions = models.ForeignKey(Question, on_delete=models.CASCADE)
 
 
 class Answer(models.Model):
@@ -98,5 +98,5 @@ class Answer(models.Model):
 
 class AnswerQuestion(models.Model):
     id = models.UUIDField(primary_key=True, auto_created=True, default=uuid.uuid4, editable=False)
-    answer = models.ForeignKey(Answer, on_delete=models.CASCADE)
-    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    answers = models.ForeignKey(Answer, on_delete=models.CASCADE)
+    questions = models.ForeignKey(Question, on_delete=models.CASCADE)
