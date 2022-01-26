@@ -7,7 +7,8 @@ from a_account.models import User
 class UserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = User(
-            username=validated_data['username']
+            username=validated_data['username'],
+            is_staff=validated_data['is_staff']
         )
         user.set_password(validated_data['password'])
         user.save()
