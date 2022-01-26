@@ -24,5 +24,5 @@ class FormEquipmentInline(admin.TabularInline):
 
 @admin.register(Form)
 class Form(admin.ModelAdmin):
-    fields = ('formName', 'createdBy', 'status')
+    fields = ('form_name', 'created_by', 'status')
     inlines = [FormEquipmentInline, FormQuestionInline]
