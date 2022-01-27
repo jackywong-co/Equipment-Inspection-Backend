@@ -3,6 +3,8 @@ from django.views.generic import TemplateView
 from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
+from a_api.permissions import ManagerPermission
 from a_form.serializers import (RoomSerializer, EquipmentSerializer, FormSerializer, QuestionSerializer,
                                 AnswerSerializer, FormEquipmentSerializer, FormQuestionSerializer)
 from a_form.models import (Room, Equipment, Form, Question, Answer, FormEquipment, FormQuestion)
@@ -22,7 +24,7 @@ class UserView(APIView):
 
 
 class RoomView(APIView):
-    permission_classes = [IsAdminUser]
+    permission_classes = [ManagerPermission]
 
     def get(self, request):
         room = Room.objects.all()
@@ -38,7 +40,7 @@ class RoomView(APIView):
 
 
 class RoomDetailView(APIView):
-    permission_classes = [IsAdminUser]
+    permission_classes = [ManagerPermission]
 
     def get_object(self, pk):
         try:
@@ -66,7 +68,7 @@ class RoomDetailView(APIView):
 
 
 class EquipmentView(APIView):
-    permission_classes = [IsAdminUser]
+    permission_classes = [ManagerPermission]
 
     def get(self, request):
         equipment = Equipment.objects.all()
@@ -82,6 +84,7 @@ class EquipmentView(APIView):
 
 
 class EquipmentDetailView(APIView):
+    permission_classes = [ManagerPermission]
 
     def get_object(self, pk):
         try:
@@ -120,6 +123,7 @@ class EquipmentDetailView(APIView):
 
 
 class FormView(APIView):
+    permission_classes = [ManagerPermission]
 
     def get(self, request):
         form = Form.objects.all()
@@ -152,6 +156,7 @@ class FormView(APIView):
 
 
 class FormDetailView(APIView):
+    permission_classes = [ManagerPermission]
 
     def get_object(self, pk):
         try:
@@ -179,6 +184,7 @@ class FormDetailView(APIView):
 
 
 class FormEquipmentView(APIView):
+    permission_classes = [ManagerPermission]
 
     def get(self, request):
         form_equipment = FormEquipment.objects.all()
@@ -187,6 +193,7 @@ class FormEquipmentView(APIView):
 
 
 class FormEquipmentDetailView(APIView):
+    permission_classes = [ManagerPermission]
 
     def get_object(self, pk):
         try:
@@ -201,6 +208,7 @@ class FormEquipmentDetailView(APIView):
 
 
 class FormQuestionView(APIView):
+    permission_classes = [ManagerPermission]
 
     def get(self, request):
         form_question = FormQuestion.objects.all()
@@ -209,6 +217,7 @@ class FormQuestionView(APIView):
 
 
 class FormQuestionDetailView(APIView):
+    permission_classes = [ManagerPermission]
 
     def get_object(self, pk):
         try:
@@ -223,6 +232,7 @@ class FormQuestionDetailView(APIView):
 
 
 class QuestionView(APIView):
+    permission_classes = [ManagerPermission]
 
     def get(self, request):
         question = Question.objects.all()
@@ -238,6 +248,7 @@ class QuestionView(APIView):
 
 
 class QuestionDetailView(APIView):
+    permission_classes = [ManagerPermission]
 
     def get_object(self, pk):
         try:
@@ -265,6 +276,7 @@ class QuestionDetailView(APIView):
 
 
 class AnswerView(APIView):
+    permission_classes = [ManagerPermission]
 
     def get(self, request):
         answer = Answer.objects.all()
@@ -280,6 +292,7 @@ class AnswerView(APIView):
 
 
 class AnswerDetailView(APIView):
+    permission_classes = [ManagerPermission]
 
     def get_object(self, pk):
         try:
