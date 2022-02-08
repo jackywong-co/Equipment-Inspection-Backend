@@ -1,5 +1,5 @@
 from django.urls import path
-from a_form.views import (UserView,
+from a_form.views import (UserView, UserDetailView,
                           RoomView, RoomDetailView,
                           EquipmentView, EquipmentDetailView,
                           FormView, FormDetailView,
@@ -14,6 +14,7 @@ from a_form.views import (UserView,
 urlpatterns = [
 
     path('user/', UserView.as_view()),
+    path('user/<str:pk>/', UserDetailView.as_view()),
 
     path('room/', RoomView.as_view()),
     path('room/<str:pk>/', RoomDetailView.as_view()),
