@@ -4,7 +4,13 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from a_account.models import User
 
 
-class UserSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.Serializer):
+    id = serializers.UUIDField(required=False)
+    username = serializers.CharField(max_length=150, required=False)
+    password = serializers.CharField(max_length=128, required=False)
+    is_staff = serializers.BooleanField(required=False)
+    is_active = serializers.BooleanField(default=True)
+
     def create(self, validated_data):
         user = User(
             username=validated_data['username'],
@@ -14,12 +20,21 @@ class UserSerializer(serializers.ModelSerializer):
         user.save()
         return user
 
-    class Meta:
-        model = User
-        fields = ('id', 'username', 'password', 'is_staff', 'is_active')
-        extra_kwargs = {
-            'password': {'write_only': True}
-        }
+    def update(self, instance, validated_data):
+        instance.username = validated_data.get('username', instance.username)
+        instance.password = validated_data.get('password', instance.password)
+        instance.is_staff = validated_data.get('is_staff', instance.is_staff)
+        instance.is_active = validated_data.get('is_active', instance.is_active)
+        instance.save()
+        return instance
+
+    # class Meta:
+    #     model = User
+    #     # fields = ('id', 'username', 'password', 'is_staff', 'is_active')
+    #     fields = '__all__'
+    #     extra_kwargs = {
+    #         'password': {'write_only': True}
+    #     }
 
 
 class LoginSerializer(TokenObtainPairSerializer):
