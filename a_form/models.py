@@ -4,18 +4,13 @@ from django.db import models
 
 from a_account.models import User
 
-status = {
-    (0, 'Inactive'),
-    (1, 'Active')
-}
-
 
 class Room(models.Model):
     id = models.UUIDField(primary_key=True, auto_created=True, default=uuid.uuid4, editable=False)
     room_name = models.CharField(max_length=30)
     location = models.CharField(max_length=30)
 
-    status = models.SmallIntegerField(choices=status, default=1)
+    is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
 
@@ -27,7 +22,7 @@ class Question(models.Model):
     id = models.UUIDField(primary_key=True, auto_created=True, default=uuid.uuid4, editable=False)
     question_text = models.CharField(max_length=30)
 
-    status = models.SmallIntegerField(choices=status, default=1)
+    is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
 
@@ -45,7 +40,7 @@ class Equipment(models.Model):
     this_inspection_on = models.DateTimeField(auto_now=True)
     next_inspection_on = models.DateTimeField(auto_now=True)
 
-    status = models.SmallIntegerField(choices=status, default=1)
+    is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
 
@@ -61,7 +56,7 @@ class Form(models.Model):
     equipments = models.ManyToManyField(Equipment, through='FormEquipment')
     questions = models.ManyToManyField(Question, through='FormQuestion')
 
-    status = models.SmallIntegerField(choices=status, default=1)
+    is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
 
@@ -89,7 +84,7 @@ class Answer(models.Model):
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Created By")
     question = models.ManyToManyField(Question)
 
-    status = models.SmallIntegerField(choices=status, default=1)
+    is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

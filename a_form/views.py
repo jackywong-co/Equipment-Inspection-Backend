@@ -19,6 +19,8 @@ class UserView(APIView):
 
     def get(self, request):
         user = User.objects.all()
+
+
         serializer = UserSerializer(user, many=True)
         return Response(serializer.data)
 
@@ -173,11 +175,11 @@ class FormView(APIView):
         form_id = Form.objects.get(id=form.id)
         for equipment in equipments:
             equipment_id = Equipment.objects.get(id=equipment)
-            form_equipment = FormEquipment.objects.create(form=form_id, equipment=equipment_id)
+            form_equipment = FormEquipment.objects.create(forms=form_id, equipments=equipment_id)
             form_equipment.save()
         for questions in questions:
             question_id = Question.objects.get(id=questions)
-            form_question = FormQuestion.objects.create(form=form_id, question=question_id)
+            form_question = FormQuestion.objects.create(forms=form_id, questions=question_id)
             form_question.save()
 
         return Response({"message": "form created"})

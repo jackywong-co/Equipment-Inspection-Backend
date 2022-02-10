@@ -34,7 +34,7 @@ class QuestionSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class FormQuestionSerializer(serializers.Serializer):
+class FormQuestionObjectSerializer(serializers.Serializer):
     questionId = serializers.UUIDField()
     formId = serializers.UUIDField()
 
@@ -42,9 +42,28 @@ class FormQuestionSerializer(serializers.Serializer):
         return FormQuestion.objects.create(**validated_data)
 
 
+class FormQuestionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Question
+        fields = ['id', 'question_text']
+
+
+class FormEquipmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Equipment
+        fields = ['id', 'equipment_name', 'equipment_code']
+
+
+class FormUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username']
+
+
 class FormSerializer(serializers.ModelSerializer):
-    # equipments = FormEquipmentSerializer(many=True, required=False)
-    # questions = FormQuestionSerializer(many=True, required=False)
+    created_by = FormUserSerializer()
+    equipments = FormEquipmentSerializer(many=True)
+    questions = FormQuestionSerializer(many=True)
 
     def create(self, validated_data):
         return Form.objects.create(**validated_data)
@@ -54,7 +73,7 @@ class FormSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class FormEquipmentSerializer(serializers.ModelSerializer):
+class FormEquipmentModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = FormEquipment
         fields = '__all__'
