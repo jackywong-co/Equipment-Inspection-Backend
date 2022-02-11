@@ -18,7 +18,8 @@ class UserView(APIView):
     permission_classes = [ManagerPermission]
 
     def get(self, request):
-        user = User.objects.all()
+        user = User.objects.filter(is_superuser=False)
+
 
 
         serializer = UserSerializer(user, many=True)
