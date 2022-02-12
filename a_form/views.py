@@ -19,9 +19,6 @@ class UserView(APIView):
 
     def get(self, request):
         user = User.objects.filter(is_superuser=False)
-
-
-
         serializer = UserSerializer(user, many=True)
         return Response(serializer.data)
 
