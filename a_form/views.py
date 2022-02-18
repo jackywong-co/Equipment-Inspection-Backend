@@ -55,16 +55,20 @@ class RoomView(APIView):
     permission_classes = [ManagerPermission]
 
     def get(self, request):
-        room = Room.objects.all()
-        serializer = RoomSerializer(room, many=True)
-        return Response(serializer.data)
+        room_all = Room.objects.all()
+        room_arr = []
+        for room in room_all:
+            room_arr.append(
+                {"id": room.id, "room_name": room.room_name,
+                 "location": room.location, "is_active": room.is_active})
+        return Response(room_arr)
 
     def post(self, request):
-        serializer = RoomSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        room_data = request.data
+        room_name = room_data["room_name"]
+        location = room_data["location"]
+        Room.objects.create(room_name=room_name, location=location)
+        return Response({"message": "room created"}, status=status.HTTP_204_NO_CONTENT)
 
 
 class RoomDetailView(APIView):
@@ -78,16 +82,34 @@ class RoomDetailView(APIView):
 
     def get(self, request, pk):
         room = self.get_object(pk)
-        serializer = RoomSerializer(room)
-        return Response(serializer.data)
+        return Response({"id": room.id, "room_name": room.room_name,
+                         "location": room.location, "is_active": room.is_active})
 
     def put(self, request, pk):
-        room = self.get_object(pk)
-        serializer = RoomSerializer(room, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        room = Room.objects.get(id=pk)
+        room_data = request.data
+        print(room_data)
+        if "room_name" in room_data:
+            room.room_name = room_data["room_name"]
+        else:
+            room.room_name = room.room_name
+        if "location" in room_data:
+            room.location = room_data["location"]
+        else:
+            room.location = room.location
+        if "is_active" in room_data:
+            room.is_active = room_data["is_active"]
+        else:
+            room.is_active = room.is_active
+        room.save()
+        # Room.objects.create(room_name=room_name, location=location)
+        return Response({"message": "room updated"}, status=status.HTTP_204_NO_CONTENT)
+        # room = self.get_object(pk)
+        # serializer = RoomSerializer(room, data=request.data)
+        # if serializer.is_valid():
+        #     serializer.save()
+        #     return Response(serializer.data)
+        # return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk):
         room = self.get_object(pk)
@@ -99,16 +121,23 @@ class EquipmentView(APIView):
     permission_classes = [ManagerPermission]
 
     def get(self, request):
-        equipment = Equipment.objects.all()
-        serializer = EquipmentSerializer(equipment, many=True)
-        return Response(serializer.data)
+        equipment_all = Equipment.objects.all()
+        equipment_arr = []
+        for equipment in equipment_all:
+            equipment_arr.append(
+                {"equipment_id": equipment.id, "equipment_name": equipment.equipment_name,
+                 "equipment_code": equipment.equipment_code, "is_active": equipment.is_active,
+                 "room_id": equipment.room.id,
+                 "room_name": equipment.room.room_name})
+        return Response(equipment_arr)
 
     def post(self, request):
-        serializer = EquipmentSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        equipment_data = request.data
+        equipment_name = equipment_data["equipment_name"]
+        equipment_code = equipment_data["equipment_code"]
+        room = Room.objects.get(id=equipment_data["room"])
+        Equipment.objects.create(equipment_name=equipment_name, equipment_code=equipment_code, room=room)
+        return Response({"message": "equipment created"}, status=status.HTTP_204_NO_CONTENT)
 
 
 class EquipmentDetailView(APIView):

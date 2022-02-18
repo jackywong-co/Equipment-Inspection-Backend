@@ -28,7 +28,16 @@ class RoomSerializer(serializers.Serializer):
 
 
 class EquipmentSerializer(serializers.ModelSerializer):
-    room = RoomSerializer()
+    id = serializers.UUIDField(required=False)
+    equipment_name = serializers.CharField(max_length=30, required=False)
+    equipment_code = serializers.CharField(max_length=30, required=False)
+    room = RoomSerializer(required=False)
+    is_active = serializers.BooleanField(default=True)
+
+    def create(self, validated_data):
+        print(validated_data)
+        return Equipment.objects.create(**validated_data)
+
     class Meta:
         model = Equipment
         fields = '__all__'
