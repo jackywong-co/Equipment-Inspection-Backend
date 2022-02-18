@@ -6,25 +6,31 @@ from a_account.serializers import UserSerializer
 from a_form.models import Room, Equipment, Form, Question, FormEquipment, FormQuestion, Answer, AnswerQuestion
 
 
-class EquipmentSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Equipment
-        fields = '__all__'
+class RoomSerializer(serializers.Serializer):
+    id = serializers.UUIDField(required=False)
+    room_name = serializers.CharField(max_length=30, required=False)
+    location = serializers.CharField(max_length=30, required=False)
+    is_active = serializers.BooleanField(default=True)
 
-
-class RoomSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         return Room.objects.create(**validated_data)
 
     def update(self, instance, validated_data):
         instance.room_name = validated_data.get('room_name', instance.room_name)
         instance.location = validated_data.get('location', instance.location)
-        instance.status = validated_data.get('status', instance.status)
+        instance.is_active = validated_data.get('is_active', instance.is_active)
         instance.save()
         return instance
 
+    # class Meta:
+    #     model = Room
+    #     fields = '__all__'
+
+
+class EquipmentSerializer(serializers.ModelSerializer):
+    room = RoomSerializer()
     class Meta:
-        model = Room
+        model = Equipment
         fields = '__all__'
 
 

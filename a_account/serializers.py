@@ -12,7 +12,6 @@ class UserSerializer(serializers.Serializer):
     is_active = serializers.BooleanField(default=True)
 
     def create(self, validated_data):
-
         user = User(
             username=validated_data['username'],
             is_staff=validated_data['is_staff']

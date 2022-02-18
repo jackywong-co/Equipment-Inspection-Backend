@@ -1,6 +1,5 @@
 from django.http import Http404
-from django.views.generic import TemplateView
-from rest_framework.permissions import IsAdminUser
+from django.db.models import Q
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -18,7 +17,8 @@ class UserView(APIView):
     permission_classes = [ManagerPermission]
 
     def get(self, request):
-        user = User.objects.filter(is_superuser=False)
+        print(UserSerializer(request.user).data["id"])
+        user = User.objects.filter(is_superuser=False).filter(~Q(id=UserSerializer(request.user).data["id"]))
         serializer = UserSerializer(user, many=True)
         return Response(serializer.data)
 
@@ -126,10 +126,10 @@ class EquipmentDetailView(APIView):
         equipment_obj = serializer.data
 
         forms_arr = []
-        form_equipments = FormEquipment.objects.filter(equipment=equipment)
+        form_equipments = FormEquipment.objects.filter(equipments=equipment)
 
         for form_equipment in form_equipments:
-            serializer = FormSerializer(form_equipment.form)
+            serializer = FormSerializer(form_equipment.forms)
             forms_arr.append(serializer.data)
 
         equipment_obj['forms'] = forms_arr
