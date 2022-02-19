@@ -88,7 +88,6 @@ class RoomDetailView(APIView):
     def put(self, request, pk):
         room = Room.objects.get(id=pk)
         room_data = request.data
-        print(room_data)
         if "room_name" in room_data:
             room.room_name = room_data["room_name"]
         else:
@@ -101,15 +100,12 @@ class RoomDetailView(APIView):
             room.is_active = room_data["is_active"]
         else:
             room.is_active = room.is_active
+        if "room_id" in room_data:
+            room.id = room_data["room_id"]
+        else:
+            room.id = room.id
         room.save()
-        # Room.objects.create(room_name=room_name, location=location)
         return Response({"message": "room updated"}, status=status.HTTP_204_NO_CONTENT)
-        # room = self.get_object(pk)
-        # serializer = RoomSerializer(room, data=request.data)
-        # if serializer.is_valid():
-        #     serializer.save()
-        #     return Response(serializer.data)
-        # return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk):
         room = self.get_object(pk)
@@ -151,27 +147,40 @@ class EquipmentDetailView(APIView):
 
     def get(self, request, pk):
         equipment = self.get_object(pk)
-        serializer = EquipmentSerializer(equipment)
-        equipment_obj = serializer.data
-
-        forms_arr = []
-        form_equipments = FormEquipment.objects.filter(equipments=equipment)
-
-        for form_equipment in form_equipments:
-            serializer = FormSerializer(form_equipment.forms)
-            forms_arr.append(serializer.data)
-
-        equipment_obj['forms'] = forms_arr
-
-        return Response(equipment_obj)
+        if equipment in FormEquipment.objects.all():
+            form_equipment = FormEquipment.objects.get(equipments=equipment)
+            form_id = form_equipment.forms.id
+            form_name = form_equipment.forms.form_name
+        else:
+            form_id = ""
+            form_name = ""
+        return Response({"equipment_id": equipment.id, "equipment_name": equipment.equipment_name,
+                         "equipment_code": equipment.equipment_code, "is_active": equipment.is_active,
+                         "room_id": equipment.room.id, "room_name": equipment.room.room_name,
+                         "form_id": form_id, "form_name": form_name
+                         })
 
     def put(self, request, pk):
         equipment = self.get_object(pk)
-        serializer = EquipmentSerializer(equipment, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        equipment_data = request.data
+        if "equipment_name" in equipment_data:
+            equipment.equipment_name = equipment_data["equipment_name"]
+        else:
+            equipment.equipment_name = equipment.equipment_name
+        if "equipment_code" in equipment_data:
+            equipment.equipment_code = equipment_data["equipment_code"]
+        else:
+            equipment.equipment_code = equipment.equipment_code
+        if "is_active" in equipment_data:
+            equipment.is_active = equipment_data["is_active"]
+        else:
+            equipment.is_active = equipment.is_active
+        if "room_id" in equipment_data:
+            equipment.room_id = equipment_data["room_id"]
+        else:
+            equipment.room_id = equipment.room_id
+        equipment.save()
+        return Response({"message": "equipment updated"}, status=status.HTTP_204_NO_CONTENT)
 
     def delete(self, request, pk):
         equipment = self.get_object(pk)
