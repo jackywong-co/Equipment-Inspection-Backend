@@ -207,7 +207,6 @@ class FormView(APIView):
         equipments = request.data['equipments']
         questions = request.data['questions']
 
-        # print(formName)
         form_id = Form.objects.get(id=form.id)
         for equipment in equipments:
             equipment_id = Equipment.objects.get(id=equipment)
@@ -301,16 +300,18 @@ class QuestionView(APIView):
     permission_classes = [ManagerPermission]
 
     def get(self, request):
-        question = Question.objects.all()
-        serializer = QuestionSerializer(question, many=True)
-        return Response(serializer.data)
+        question_all = Question.objects.all()
+        question_arr = []
+        for question in question_all:
+            question_arr.append(
+                {"id": question.id, "question_text": question.question_text, "is_active": question.is_active})
+        return Response(question_arr)
 
     def post(self, request):
-        serializer = QuestionSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        question_data = request.data
+        question_text = question_data["question_text"]
+        Question.objects.create(question_text=question_text)
+        return Response({"message": "question created"}, status=status.HTTP_204_NO_CONTENT)
 
 
 class QuestionDetailView(APIView):
@@ -324,16 +325,27 @@ class QuestionDetailView(APIView):
 
     def get(self, request, pk):
         question = self.get_object(pk)
-        serializer = QuestionSerializer(question)
-        return Response(serializer.data)
+        return Response({"id": question.id, "question_text": question.question_text,
+                         "is_active": question.is_active})
 
     def put(self, request, pk):
+
         question = self.get_object(pk)
-        serializer = QuestionSerializer(question, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        question_data = request.data
+        if "question_text" in question_data:
+            question.question_text = question_data["question_text"]
+        else:
+            question.question_text = question.question_text
+        if "is_active" in question_data:
+            question.is_active = question_data["is_active"]
+        else:
+            question.is_active = question.is_active
+        if "id" in question_data:
+            question.id = question_data["id"]
+        else:
+            question.id = question.id
+        question.save()
+        return Response({"message": "question updated"}, status=status.HTTP_204_NO_CONTENT)
 
     def delete(self, request, pk):
         question = self.get_object(pk)

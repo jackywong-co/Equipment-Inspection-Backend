@@ -1,7 +1,5 @@
 import uuid
-
 from django.db import models
-
 from a_account.models import User
 
 
@@ -95,11 +93,3 @@ class AnswerQuestion(models.Model):
     id = models.UUIDField(primary_key=True, auto_created=True, default=uuid.uuid4, editable=False)
     answers = models.ForeignKey(Answer, on_delete=models.CASCADE)
     questions = models.ForeignKey(Question, on_delete=models.CASCADE)
-
-
-# class Record(models.Model):
-#     id = models.UUIDField(primary_key=True, auto_created=True, default=uuid.uuid4, editable=False)
-#     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
-#     form = models.ForeignKey(Form, on_delete=models.CASCADE)
-#     answer = models.ForeignKey(Answer, on_delete=models.CASCADE)
-#     created_at = models.DateTimeField(auto_now_add=True)
