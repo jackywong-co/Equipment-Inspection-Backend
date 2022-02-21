@@ -1,4 +1,4 @@
-"""Intelligent_Equipment_Inspection_System_Backend URL Configuration
+"""equipment_inspection_backend URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/4.0/topics/http/urls/

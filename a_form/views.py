@@ -192,18 +192,42 @@ class FormView(APIView):
     permission_classes = [ManagerPermission]
 
     def get(self, request):
-        form = Form.objects.all()
-        serializer = FormSerializer(form, many=True)
-        return Response(serializer.data)
+        form_all = Form.objects.all()
+        form_arr = []
+        for form in form_all:
+            form_equipment = FormEquipment.objects.filter(forms=form.id)
+            equipment_arr = []
+            for form_equipment in form_equipment:
+                equipment_arr.append(
+                    {"equipment_id": form_equipment.equipments.id,
+                     "equipment_name": form_equipment.equipments.equipment_name,
+                     "equipment_code": form_equipment.equipments.equipment_code,
+                     "room_id": form_equipment.equipments.room.id,
+                     "room_name": form_equipment.equipments.room.room_name,
+                     }
+                )
+            form_question = FormQuestion.objects.filter(forms=form.id)
+            question_arr = []
+            for form_questions in form_question:
+                question_arr.append(
+                    {"question_id": form_questions.questions.id,
+                     "question_text": form_questions.questions.question_text}
+                )
+            form_arr.append(
+                {"form_id": form.id,
+                 "form_name": form.form_name,
+                 "created_by": form.created_by.id,
+                 "equipments": equipment_arr,
+                 "questions": question_arr,
+                 "is_active": form.is_active})
+        return Response(form_arr)
 
     def post(self, request):
         form_name = request.data['form_name']
         user = User.objects.get(id=request.data['created_by'])
         created_by = user
         form = Form.objects.create(form_name=form_name, created_by=created_by)
-
         form.save()
-
         equipments = request.data['equipments']
         questions = request.data['questions']
 

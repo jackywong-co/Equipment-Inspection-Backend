@@ -1,5 +1,5 @@
 """
-ASGI config for Intelligent_Equipment_Inspection_System_Backend project.
+ASGI config for equipment_inspection_backend project.
 
 It exposes the ASGI callable as a module-level variable named ``application``.
 
@@ -11,6 +11,6 @@ import os
 
 from django.core.asgi import get_asgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Intelligent_Equipment_Inspection_System_Backend.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'equipment_inspection_backend.settings')
 
 application = get_asgi_application()
