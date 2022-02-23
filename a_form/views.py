@@ -216,7 +216,8 @@ class FormView(APIView):
             form_arr.append(
                 {"form_id": form.id,
                  "form_name": form.form_name,
-                 "created_by": form.created_by.id,
+                 "created_by_id": form.created_by.id,
+                 "created_by_name": form.created_by.username,
                  "equipments": equipment_arr,
                  "questions": question_arr,
                  "is_active": form.is_active})
@@ -255,16 +256,68 @@ class FormDetailView(APIView):
 
     def get(self, request, pk):
         form = self.get_object(pk)
-        serializer = FormSerializer(form)
-        return Response(serializer.data)
+        # serializer = FormSerializer(form)
+        # return Response(serializer.data)
+        # form_arr = []
+        form_equipment = FormEquipment.objects.filter(forms=form.id)
+        equipment_arr = []
+        for form_equipment in form_equipment:
+            equipment_arr.append(
+                {"equipment_id": form_equipment.equipments.id,
+                 "equipment_name": form_equipment.equipments.equipment_name,
+                 "equipment_code": form_equipment.equipments.equipment_code,
+                 "room_id": form_equipment.equipments.room.id,
+                 "room_name": form_equipment.equipments.room.room_name,
+                 }
+            )
+        form_question = FormQuestion.objects.filter(forms=form.id)
+        question_arr = []
+        for form_questions in form_question:
+            question_arr.append(
+                {"question_id": form_questions.questions.id,
+                 "question_text": form_questions.questions.question_text}
+            )
+        #  form_arr.append(
+        # )
+        return Response({"form_id": form.id,
+                         "form_name": form.form_name,
+                         "created_by_id": form.created_by.id,
+                         "created_by_name": form.created_by.username,
+                         "equipments": equipment_arr,
+                         "questions": question_arr,
+                         "is_active": form.is_active})
 
     def put(self, request, pk):
         form = self.get_object(pk)
-        serializer = FormSerializer(form, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        form_data = request.data
+        if "form_name" in form_data:
+            form.form_name = form_data["form_name"]
+        else:
+            form.form_name = form.form_name
+
+        if "created_by_id" in form_data:
+            form.created_by = form_data["created_by_id"]
+        else:
+            form.created_by = form.created_by
+
+        # if "equipments" in form_data:
+        #     form.equipments = form_data["equipments"]
+        # else:
+        #     form.equipments = form.equipments
+
+        if "is_active" in form_data:
+            form.is_active = form_data["is_active"]
+        else:
+            form.is_active = form.is_active
+
+        form.save()
+        # serializer = FormSerializer(form, data=request.data)
+        # if serializer.is_valid():
+        #     serializer.save()
+        #     return Response(serializer.data)
+        # return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({"message": "form updated"}, status=status.HTTP_204_NO_CONTENT)
 
     def delete(self, request, pk):
         form = self.get_object(pk)
