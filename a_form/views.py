@@ -1,3 +1,5 @@
+import json
+
 from django.http import Http404
 from django.db.models import Q
 from rest_framework.response import Response
@@ -17,8 +19,7 @@ class UserView(APIView):
     permission_classes = [ManagerPermission]
 
     def get(self, request):
-        print(UserSerializer(request.user).data["id"])
-        user = User.objects.filter(is_superuser=False).filter(~Q(id=UserSerializer(request.user).data["id"]))
+        user = User.objects.filter(is_superuser=False)
         serializer = UserSerializer(user, many=True)
         return Response(serializer.data)
 
@@ -195,6 +196,10 @@ class FormView(APIView):
         form_all = Form.objects.all()
         form_arr = []
         for form in form_all:
+            user = {
+                "id": form.created_by.id,
+                "username": form.created_by.username
+            }
             form_equipment = FormEquipment.objects.filter(forms=form.id)
             equipment_arr = []
             for form_equipment in form_equipment:
@@ -216,8 +221,7 @@ class FormView(APIView):
             form_arr.append(
                 {"form_id": form.id,
                  "form_name": form.form_name,
-                 "created_by_id": form.created_by.id,
-                 "created_by_name": form.created_by.username,
+                 "created_by": user,
                  "equipments": equipment_arr,
                  "questions": question_arr,
                  "is_active": form.is_active})
@@ -228,12 +232,15 @@ class FormView(APIView):
         user = User.objects.get(id=request.data['created_by'])
         created_by = user
         form = Form.objects.create(form_name=form_name, created_by=created_by)
-        form.save()
+        # form.save()
         equipments = request.data['equipments']
         questions = request.data['questions']
-
+        print(equipments)
+        print(questions)
+        #
         form_id = Form.objects.get(id=form.id)
         for equipment in equipments:
+            print(equipment)
             equipment_id = Equipment.objects.get(id=equipment)
             form_equipment = FormEquipment.objects.create(forms=form_id, equipments=equipment_id)
             form_equipment.save()
