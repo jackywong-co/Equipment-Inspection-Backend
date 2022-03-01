@@ -450,7 +450,7 @@ class AnswerView(APIView):
 
     def get(self, request):
         answer = Answer.objects.all()
-        serializer = AnswerSeripalizer(answer, many=True)
+        serializer = AnswerSerializer(answer, many=True)
         return Response(serializer.data)
 
     def post(self, request):
