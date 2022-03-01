@@ -58,10 +58,24 @@ class RoomView(APIView):
     def get(self, request):
         room_all = Room.objects.all()
         room_arr = []
+
         for room in room_all:
+            equipment_arr = []
+            for equipment in Equipment.objects.filter(room=room):
+                equipment_arr.append(
+                    {
+                        "equipment_id": equipment.id
+                    }
+                )
             room_arr.append(
-                {"id": room.id, "room_name": room.room_name,
-                 "location": room.location, "is_active": room.is_active})
+                {
+                    "id": room.id,
+                    "room_name": room.room_name,
+                    "location": room.location,
+                    "equipments": equipment_arr,
+                    "is_active": room.is_active
+                }
+            )
         return Response(room_arr)
 
     def post(self, request):
@@ -240,7 +254,6 @@ class FormView(APIView):
         #
         form_id = Form.objects.get(id=form.id)
         for equipment in equipments:
-            print(equipment)
             equipment_id = Equipment.objects.get(id=equipment)
             form_equipment = FormEquipment.objects.create(forms=form_id, equipments=equipment_id)
             form_equipment.save()
@@ -263,9 +276,6 @@ class FormDetailView(APIView):
 
     def get(self, request, pk):
         form = self.get_object(pk)
-        # serializer = FormSerializer(form)
-        # return Response(serializer.data)
-        # form_arr = []
         form_equipment = FormEquipment.objects.filter(forms=form.id)
         equipment_arr = []
         for form_equipment in form_equipment:
@@ -307,8 +317,12 @@ class FormDetailView(APIView):
         else:
             form.created_by = form.created_by
 
-        # if "equipments" in form_data:
-        #     form.equipments = form_data["equipments"]
+        if "equipments" in form_data:
+            for equipment in form_data["equipments"]:
+                equipment_obj = Equipment.objects.get(id=equipment)
+                form_equipment = FormEquipment.objects.get(forms_id=pk)
+                form_equipment.equipments = equipment_obj
+                form_equipment.save()
         # else:
         #     form.equipments = form.equipments
 
@@ -318,12 +332,6 @@ class FormDetailView(APIView):
             form.is_active = form.is_active
 
         form.save()
-        # serializer = FormSerializer(form, data=request.data)
-        # if serializer.is_valid():
-        #     serializer.save()
-        #     return Response(serializer.data)
-        # return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
         return Response({"message": "form updated"}, status=status.HTTP_204_NO_CONTENT)
 
     def delete(self, request, pk):
@@ -442,7 +450,7 @@ class AnswerView(APIView):
 
     def get(self, request):
         answer = Answer.objects.all()
-        serializer = AnswerSerializer(answer, many=True)
+        serializer = AnswerSeripalizer(answer, many=True)
         return Response(serializer.data)
 
     def post(self, request):
