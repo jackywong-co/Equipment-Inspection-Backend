@@ -2,6 +2,7 @@ import json
 
 from django.http import Http404
 from django.db.models import Q
+from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -447,6 +448,7 @@ class QuestionDetailView(APIView):
 
 class AnswerView(APIView):
     permission_classes = [ManagerPermission]
+    parser_classes = [MultiPartParser, FormParser]
 
     def get(self, request):
         answer = Answer.objects.all()
