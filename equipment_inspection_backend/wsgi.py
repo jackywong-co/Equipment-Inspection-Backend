@@ -1,5 +1,5 @@
 """
-WSGI config for Intelligent_Equipment_Inspection_System_Backend project.
+WSGI config for equipment_inspection_backend project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 
@@ -11,6 +11,6 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Intelligent_Equipment_Inspection_System_Backend.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'equipment_inspection_backend.settings')
 
 application = get_wsgi_application()

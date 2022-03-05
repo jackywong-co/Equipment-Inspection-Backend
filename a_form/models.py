@@ -1,13 +1,6 @@
 import uuid
-
 from django.db import models
-
 from a_account.models import User
-
-status = {
-    (0, 'Inactive'),
-    (1, 'Active')
-}
 
 
 class Room(models.Model):
@@ -15,7 +8,7 @@ class Room(models.Model):
     room_name = models.CharField(max_length=30)
     location = models.CharField(max_length=30)
 
-    status = models.SmallIntegerField(choices=status, default=1)
+    is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
 
@@ -27,7 +20,7 @@ class Question(models.Model):
     id = models.UUIDField(primary_key=True, auto_created=True, default=uuid.uuid4, editable=False)
     question_text = models.CharField(max_length=30)
 
-    status = models.SmallIntegerField(choices=status, default=1)
+    is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
 
@@ -45,7 +38,7 @@ class Equipment(models.Model):
     this_inspection_on = models.DateTimeField(auto_now=True)
     next_inspection_on = models.DateTimeField(auto_now=True)
 
-    status = models.SmallIntegerField(choices=status, default=1)
+    is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
 
@@ -61,7 +54,7 @@ class Form(models.Model):
     equipments = models.ManyToManyField(Equipment, through='FormEquipment')
     questions = models.ManyToManyField(Question, through='FormQuestion')
 
-    status = models.SmallIntegerField(choices=status, default=1)
+    is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
 
@@ -71,14 +64,14 @@ class Form(models.Model):
 
 class FormEquipment(models.Model):
     id = models.UUIDField(primary_key=True, auto_created=True, default=uuid.uuid4, editable=False)
-    form = models.ForeignKey(Form, related_name='forms', on_delete=models.CASCADE)
-    equipment = models.ForeignKey(Equipment, related_name='equipments', on_delete=models.CASCADE)
+    forms = models.ForeignKey(Form, related_name='forms', on_delete=models.CASCADE)
+    equipments = models.ForeignKey(Equipment, related_name='equipments', on_delete=models.CASCADE)
 
 
 class FormQuestion(models.Model):
     id = models.UUIDField(primary_key=True, auto_created=True, default=uuid.uuid4, editable=False)
-    form = models.ForeignKey(Form, on_delete=models.CASCADE)
-    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    forms = models.ForeignKey(Form, on_delete=models.CASCADE)
+    questions = models.ForeignKey(Question, on_delete=models.CASCADE)
 
 
 class Answer(models.Model):
@@ -87,9 +80,9 @@ class Answer(models.Model):
 
     form = models.ForeignKey(Form, on_delete=models.CASCADE, verbose_name="Form")
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Created By")
-    question = models.ManyToManyField(Question)
+    
 
-    status = models.SmallIntegerField(choices=status, default=1)
+    is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -98,5 +91,5 @@ class Answer(models.Model):
 
 class AnswerQuestion(models.Model):
     id = models.UUIDField(primary_key=True, auto_created=True, default=uuid.uuid4, editable=False)
-    answer = models.ForeignKey(Answer, on_delete=models.CASCADE)
-    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    answers = models.ForeignKey(Answer, on_delete=models.CASCADE)
+    questions = models.ForeignKey(Question, on_delete=models.CASCADE)

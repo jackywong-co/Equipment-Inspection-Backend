@@ -1,10 +1,20 @@
 from django.urls import path
-from a_form.views import RoomView, RoomDetailView, EquipmentView, EquipmentDetailView, UserView, FormView, QuestionView, \
-    FormEquipmentView, FormDetailView, FormQuestionView, FormEquipmentDetailView, FormQuestionDetailView
+from a_form.views import (UserView, UserDetailView,
+                          RoomView, RoomDetailView,
+                          EquipmentView, EquipmentDetailView,
+                          FormView, FormDetailView,
+                          QuestionView,
+                          FormEquipmentView,
+                          FormQuestionView,
+                          FormEquipmentDetailView,
+                          FormQuestionDetailView,
+                          AnswerView, QuestionDetailView, AnswerDetailView
+                          )
 
 urlpatterns = [
 
     path('user/', UserView.as_view()),
+    path('user/<str:pk>/', UserDetailView.as_view()),
 
     path('room/', RoomView.as_view()),
     path('room/<str:pk>/', RoomDetailView.as_view()),
@@ -16,6 +26,10 @@ urlpatterns = [
     path('form/<str:pk>/', FormDetailView.as_view()),
 
     path('question/', QuestionView.as_view()),
+    path('question/<str:pk>/', QuestionDetailView.as_view()),
+
+    path('answer/', AnswerView.as_view()),
+    path('answer/<str:pk>/', AnswerDetailView.as_view()),
 
     path('formEquipmentView/', FormEquipmentView.as_view()),
     path('formEquipmentView/<str:pk>/', FormEquipmentDetailView.as_view()),
