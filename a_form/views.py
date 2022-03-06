@@ -2,6 +2,7 @@ import json
 
 from django.http import Http404
 from django.db.models import Q
+from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -162,7 +163,7 @@ class EquipmentDetailView(APIView):
 
     def get(self, request, pk):
         equipment = self.get_object(pk)
-        if equipment in FormEquipment.objects.all():
+        if FormEquipment.objects.filter(equipments=equipment):
             form_equipment = FormEquipment.objects.get(equipments=equipment)
             form_id = form_equipment.forms.id
             form_name = form_equipment.forms.form_name
@@ -447,6 +448,7 @@ class QuestionDetailView(APIView):
 
 class AnswerView(APIView):
     permission_classes = [ManagerPermission]
+    parser_classes = [MultiPartParser, FormParser]
 
     def get(self, request):
         answer = Answer.objects.all()
