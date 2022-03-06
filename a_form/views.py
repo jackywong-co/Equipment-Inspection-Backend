@@ -98,8 +98,13 @@ class RoomDetailView(APIView):
 
     def get(self, request, pk):
         room = self.get_object(pk)
-        return Response({"id": room.id, "room_name": room.room_name,
-                         "location": room.location, "is_active": room.is_active})
+        return Response(
+            {"id": room.id,
+             "room_name": room.room_name,
+             "location": room.location,
+             "is_active": room.is_active
+             }
+        )
 
     def put(self, request, pk):
         room = Room.objects.get(id=pk)
@@ -137,10 +142,15 @@ class EquipmentView(APIView):
         equipment_arr = []
         for equipment in equipment_all:
             equipment_arr.append(
-                {"equipment_id": equipment.id, "equipment_name": equipment.equipment_name,
-                 "equipment_code": equipment.equipment_code, "is_active": equipment.is_active,
-                 "room_id": equipment.room.id,
-                 "room_name": equipment.room.room_name})
+                {
+                    "equipment_id": equipment.id,
+                    "equipment_name": equipment.equipment_name,
+                    "equipment_code": equipment.equipment_code,
+                    "is_active": equipment.is_active,
+                    "room_id": equipment.room.id,
+                    "room_name": equipment.room.room_name
+                }
+            )
         return Response(equipment_arr)
 
     def post(self, request):
@@ -170,11 +180,18 @@ class EquipmentDetailView(APIView):
         else:
             form_id = ""
             form_name = ""
-        return Response({"equipment_id": equipment.id, "equipment_name": equipment.equipment_name,
-                         "equipment_code": equipment.equipment_code, "is_active": equipment.is_active,
-                         "room_id": equipment.room.id, "room_name": equipment.room.room_name,
-                         "form_id": form_id, "form_name": form_name
-                         })
+        return Response(
+            {
+                "equipment_id": equipment.id,
+                "equipment_name": equipment.equipment_name,
+                "equipment_code": equipment.equipment_code,
+                "is_active": equipment.is_active,
+                "room_id": equipment.room.id,
+                "room_name": equipment.room.room_name,
+                "form_id": form_id,
+                "form_name": form_name
+            }
+        )
 
     def put(self, request, pk):
         equipment = self.get_object(pk)
@@ -219,27 +236,33 @@ class FormView(APIView):
             equipment_arr = []
             for form_equipment in form_equipment:
                 equipment_arr.append(
-                    {"equipment_id": form_equipment.equipments.id,
-                     "equipment_name": form_equipment.equipments.equipment_name,
-                     "equipment_code": form_equipment.equipments.equipment_code,
-                     "room_id": form_equipment.equipments.room.id,
-                     "room_name": form_equipment.equipments.room.room_name,
-                     }
+                    {
+                        "equipment_id": form_equipment.equipments.id,
+                        "equipment_name": form_equipment.equipments.equipment_name,
+                        "equipment_code": form_equipment.equipments.equipment_code,
+                        "room_id": form_equipment.equipments.room.id,
+                        "room_name": form_equipment.equipments.room.room_name,
+                    }
                 )
             form_question = FormQuestion.objects.filter(forms=form.id)
             question_arr = []
             for form_questions in form_question:
                 question_arr.append(
-                    {"question_id": form_questions.questions.id,
-                     "question_text": form_questions.questions.question_text}
+                    {
+                        "question_id": form_questions.questions.id,
+                        "question_text": form_questions.questions.question_text
+                    }
                 )
             form_arr.append(
-                {"form_id": form.id,
-                 "form_name": form.form_name,
-                 "created_by": user,
-                 "equipments": equipment_arr,
-                 "questions": question_arr,
-                 "is_active": form.is_active})
+                {
+                    "form_id": form.id,
+                    "form_name": form.form_name,
+                    "created_by": user,
+                    "equipments": equipment_arr,
+                    "questions": question_arr,
+                    "is_active": form.is_active
+                }
+            )
         return Response(form_arr)
 
     def post(self, request):
@@ -247,12 +270,9 @@ class FormView(APIView):
         user = User.objects.get(id=request.data['created_by'])
         created_by = user
         form = Form.objects.create(form_name=form_name, created_by=created_by)
-        # form.save()
         equipments = request.data['equipments']
         questions = request.data['questions']
-        print(equipments)
-        print(questions)
-        #
+
         form_id = Form.objects.get(id=form.id)
         for equipment in equipments:
             equipment_id = Equipment.objects.get(id=equipment)
@@ -281,29 +301,33 @@ class FormDetailView(APIView):
         equipment_arr = []
         for form_equipment in form_equipment:
             equipment_arr.append(
-                {"equipment_id": form_equipment.equipments.id,
-                 "equipment_name": form_equipment.equipments.equipment_name,
-                 "equipment_code": form_equipment.equipments.equipment_code,
-                 "room_id": form_equipment.equipments.room.id,
-                 "room_name": form_equipment.equipments.room.room_name,
-                 }
+                {
+                    "equipment_id": form_equipment.equipments.id,
+                    "equipment_name": form_equipment.equipments.equipment_name,
+                    "equipment_code": form_equipment.equipments.equipment_code,
+                    "room_id": form_equipment.equipments.room.id,
+                    "room_name": form_equipment.equipments.room.room_name,
+                }
             )
         form_question = FormQuestion.objects.filter(forms=form.id)
         question_arr = []
         for form_questions in form_question:
             question_arr.append(
-                {"question_id": form_questions.questions.id,
-                 "question_text": form_questions.questions.question_text}
+                {
+                    "question_id": form_questions.questions.id,
+                    "question_text": form_questions.questions.question_text
+                }
             )
-        #  form_arr.append(
-        # )
-        return Response({"form_id": form.id,
-                         "form_name": form.form_name,
-                         "created_by_id": form.created_by.id,
-                         "created_by_name": form.created_by.username,
-                         "equipments": equipment_arr,
-                         "questions": question_arr,
-                         "is_active": form.is_active})
+        return Response(
+            {"form_id": form.id,
+             "form_name": form.form_name,
+             "created_by_id": form.created_by.id,
+             "created_by_name": form.created_by.username,
+             "equipments": equipment_arr,
+             "questions": question_arr,
+             "is_active": form.is_active
+             }
+        )
 
     def put(self, request, pk):
         form = self.get_object(pk)
@@ -397,7 +421,12 @@ class QuestionView(APIView):
         question_arr = []
         for question in question_all:
             question_arr.append(
-                {"id": question.id, "question_text": question.question_text, "is_active": question.is_active})
+                {
+                    "id": question.id,
+                    "question_text": question.question_text,
+                    "is_active": question.is_active
+                }
+            )
         return Response(question_arr)
 
     def post(self, request):
@@ -418,8 +447,12 @@ class QuestionDetailView(APIView):
 
     def get(self, request, pk):
         question = self.get_object(pk)
-        return Response({"id": question.id, "question_text": question.question_text,
-                         "is_active": question.is_active})
+        response = {
+            "id": question.id,
+            "question_text": question.question_text,
+            "is_active": question.is_active
+        }
+        return Response(response)
 
     def put(self, request, pk):
 
@@ -451,11 +484,38 @@ class AnswerView(APIView):
     parser_classes = [MultiPartParser, FormParser]
 
     def get(self, request):
-        answer = Answer.objects.all()
-        serializer = AnswerSerializer(answer, many=True)
-        return Response(serializer.data)
+        answer_all = Answer.objects.all()
+        answer_arr = []
+        for answer in answer_all:
+            image = ""
+            if answer.image:
+                image = answer.image.url
+            form_equipment = FormEquipment.objects.get(forms=answer.form)
+            equipment = Equipment.objects.get(id=form_equipment.equipments.id)
+            answer_arr.append(
+                {
+                    "id": answer.id,
+                    "answer_text": answer.answer_text,
+                    "image": image,
+                    "created_by": {
+                        "id": answer.created_by_id,
+                        "username": answer.created_by.username
+                    },
+                    "form_id": answer.form.id,
+                    "form_name": answer.form.form_name,
+                    "equipment_id": equipment.id,
+                    "equipment_code": equipment.equipment_code,
+                    "equipment_name": equipment.equipment_name,
+                    "room_id": equipment.room.id,
+                    "room_name": equipment.room.room_name,
+                    "is_active": answer.is_active,
+                    "created_at": answer.created_at.strftime("%Y-%m-%d %H:%M:%S")
+                }
+            )
+        return Response(answer_arr)
 
     def post(self, request):
+        print(request.data)
         serializer = AnswerSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -465,6 +525,7 @@ class AnswerView(APIView):
 
 class AnswerDetailView(APIView):
     permission_classes = [ManagerPermission]
+    parser_classes = [MultiPartParser, FormParser]
 
     def get_object(self, pk):
         try:
@@ -474,8 +535,30 @@ class AnswerDetailView(APIView):
 
     def get(self, request, pk):
         answer = self.get_object(pk)
-        serializer = AnswerSerializer(answer)
-        return Response(serializer.data)
+        form_equipment = FormEquipment.objects.get(forms=answer.form)
+        equipment = Equipment.objects.get(id=form_equipment.equipments.id)
+        image = ""
+        if answer.image:
+            image = answer.image.url
+        response = {
+            "id": answer.id,
+            "answer_text": answer.answer_text,
+            "image": image,
+            "created_by": {
+                "id": answer.created_by_id,
+                "username": answer.created_by.username
+            },
+            "form_id": answer.form.id,
+            "form_name": answer.form.form_name,
+            "equipment_id": equipment.id,
+            "equipment_code": equipment.equipment_code,
+            "equipment_name": equipment.equipment_name,
+            "room_id": equipment.room.id,
+            "room_name": equipment.room.room_name,
+            "is_active": answer.is_active,
+            "created_at": answer.created_at.strftime("%Y-%m-%d %H:%M:%S")
+        }
+        return Response(response)
 
     def put(self, request, pk):
         answer = self.get_object(pk)
@@ -488,4 +571,4 @@ class AnswerDetailView(APIView):
     def delete(self, request, pk):
         answer = self.get_object(pk)
         answer.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response({"message": "record deleted"}, status=status.HTTP_204_NO_CONTENT)
