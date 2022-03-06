@@ -163,7 +163,7 @@ class EquipmentDetailView(APIView):
 
     def get(self, request, pk):
         equipment = self.get_object(pk)
-        if equipment in FormEquipment.objects.all():
+        if FormEquipment.objects.filter(equipments=equipment):
             form_equipment = FormEquipment.objects.get(equipments=equipment)
             form_id = form_equipment.forms.id
             form_name = form_equipment.forms.form_name
