@@ -9,10 +9,11 @@ from rest_framework.views import APIView
 from a_api.permissions import ManagerPermission
 from a_form.serializers import (RoomSerializer, EquipmentSerializer, FormSerializer, QuestionSerializer,
                                 AnswerSerializer, FormEquipmentSerializer, FormQuestionSerializer)
-from a_form.models import (Room, Equipment, Form, Question, Answer, FormEquipment, FormQuestion)
+from a_form.models import (Room, Equipment, Form, Question, Answer, FormEquipment, FormQuestion, AnswerQuestion)
 from a_account.serializers import UserSerializer
 from a_account.models import User
 from rest_framework import status
+from django.conf import settings
 
 
 # Create your views here.
@@ -487,6 +488,8 @@ class AnswerView(APIView):
         answer_all = Answer.objects.all()
         answer_arr = []
         for answer in answer_all:
+            answer_question = AnswerQuestion.objects.get(answers=answer)
+            question = Question.objects.get(id=answer_question.questions.id)
             image = ""
             if answer.image:
                 image = answer.image.url
@@ -508,6 +511,7 @@ class AnswerView(APIView):
                     "equipment_name": equipment.equipment_name,
                     "room_id": equipment.room.id,
                     "room_name": equipment.room.room_name,
+                    "question_text": question.question_text,
                     "is_active": answer.is_active,
                     "created_at": answer.created_at.strftime("%Y-%m-%d %H:%M:%S")
                 }
@@ -515,12 +519,14 @@ class AnswerView(APIView):
         return Response(answer_arr)
 
     def post(self, request):
-        print(request.data)
         serializer = AnswerSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            answer = Answer.objects.get(id=serializer.data.get('id'))
+            question = Question.objects.get(id=request.data['question'])
+            AnswerQuestion.objects.create(answers=answer, questions=question)
+            return Response({"message": "Record Created"}, status=status.HTTP_204_NO_CONTENT)
+        return Response({"message": "Record Create Failed"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class AnswerDetailView(APIView):
@@ -537,6 +543,8 @@ class AnswerDetailView(APIView):
         answer = self.get_object(pk)
         form_equipment = FormEquipment.objects.get(forms=answer.form)
         equipment = Equipment.objects.get(id=form_equipment.equipments.id)
+        answer_question = AnswerQuestion.objects.get(answers=answer)
+        question = Question.objects.get(id=answer_question.questions.id)
         image = ""
         if answer.image:
             image = answer.image.url
@@ -555,6 +563,7 @@ class AnswerDetailView(APIView):
             "equipment_name": equipment.equipment_name,
             "room_id": equipment.room.id,
             "room_name": equipment.room.room_name,
+            "question_text": question.question_text,
             "is_active": answer.is_active,
             "created_at": answer.created_at.strftime("%Y-%m-%d %H:%M:%S")
         }

@@ -74,12 +74,9 @@ class FormQuestion(models.Model):
     questions = models.ForeignKey(Question, on_delete=models.CASCADE)
 
 
-# def upload_to(instance, filename):
-#     return 'answer/{filename}'.format(filenam=filename)
-
 class Answer(models.Model):
     id = models.UUIDField(primary_key=True, auto_created=True, default=uuid.uuid4, editable=False)
-    answer_text = models.CharField(max_length=30)
+    answer_text = models.CharField(max_length=30, null=True, blank=True)
 
     form = models.ForeignKey(Form, on_delete=models.CASCADE, verbose_name="Form")
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Created By")
