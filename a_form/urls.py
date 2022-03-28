@@ -10,8 +10,6 @@ from a_form.views import (UserView, UserDetailView,
                           FormQuestionDetailView,
                           AnswerView, QuestionDetailView, AnswerDetailView
                           )
-from django.conf import settings
-from django.conf.urls.static import static
 urlpatterns = [
 
     path('user/', UserView.as_view()),
@@ -40,4 +38,3 @@ urlpatterns = [
 
 ]
 
-urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

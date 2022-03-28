@@ -1,3 +1,4 @@
+import os
 import uuid
 from django.db import models
 from a_account.models import User
@@ -74,13 +75,26 @@ class FormQuestion(models.Model):
     questions = models.ForeignKey(Question, on_delete=models.CASCADE)
 
 
+def path_and_rename(instance, filename):
+    upload_to = 'image/record/%Y%m%d'
+    ext = filename.split('.')[-1]
+    # get filename
+    if instance.pk:
+        filename = '{}.{}'.format(instance.pk, ext)
+    else:
+        # set filename as random string
+        filename = '{}.{}'.format(uuid.uuid4())
+    # return the whole path to the file
+    return os.path.join(upload_to, filename)
+
+
 class Answer(models.Model):
     id = models.UUIDField(primary_key=True, auto_created=True, default=uuid.uuid4, editable=False)
     answer_text = models.CharField(max_length=30, null=True, blank=True)
 
     form = models.ForeignKey(Form, on_delete=models.CASCADE, verbose_name="Form")
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Created By")
-    image = models.ImageField(upload_to="answer/image/%Y/%m/%d", blank=True, null=True)
+    image = models.ImageField(upload_to=path_and_rename, blank=True, null=True)
 
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
