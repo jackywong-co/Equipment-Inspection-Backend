@@ -511,6 +511,7 @@ class AnswerView(APIView):
                     "equipment_name": equipment.equipment_name,
                     "room_id": equipment.room.id,
                     "room_name": equipment.room.room_name,
+                    "question_id": question.id,
                     "question_text": question.question_text,
                     "is_active": answer.is_active,
                     "created_at": answer.created_at.strftime("%Y-%m-%d %H:%M:%S")

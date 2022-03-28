@@ -96,8 +96,6 @@ class FormEquipmentModelSerializer(serializers.ModelSerializer):
 
 class AnswerSerializer(serializers.ModelSerializer):
     is_active = serializers.BooleanField(default=True)
-    created_by = UserSerializer(required=False)
-    form = FormSerializer(required=False)
     class Meta:
         model = Answer
         fields = '__all__'
