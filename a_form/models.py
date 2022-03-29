@@ -2,6 +2,7 @@ import os
 import uuid
 from django.db import models
 from a_account.models import User
+from datetime import date
 
 
 class Room(models.Model):
@@ -47,6 +48,27 @@ class Equipment(models.Model):
         return self.equipment_name
 
 
+def path_and_rename_to_equipment(instance, filename):
+    upload_to = 'image/equipment/{}@{}'.format(instance.equipment.room.room_name, instance.equipment.equipment_name)
+    ext = filename.split('.')[-1]
+    # if ext != 'png':
+    #     ext = 'png'
+    # get filename
+    if instance.pk:
+        filename = '{}.{}'.format(instance.pk, ext)
+    else:
+        # set filename as random string
+        filename = '{}.{}'.format(uuid.uuid4(), ext)
+    # return the whole path to the file
+    return os.path.join(upload_to, filename)
+
+
+class EquipmentImage(models.Model):
+    id = models.UUIDField(primary_key=True, auto_created=True, default=uuid.uuid4, editable=False)
+    equipment = models.ForeignKey(Equipment, on_delete=models.CASCADE)
+    image = models.ImageField(upload_to=path_and_rename_to_equipment, blank=True, null=True)
+
+
 class Form(models.Model):
     id = models.UUIDField(primary_key=True, auto_created=True, default=uuid.uuid4, editable=False)
     form_name = models.CharField(max_length=30, verbose_name="Form Name", blank=False)
@@ -75,15 +97,15 @@ class FormQuestion(models.Model):
     questions = models.ForeignKey(Question, on_delete=models.CASCADE)
 
 
-def path_and_rename(instance, filename):
-    upload_to = 'image/record/%Y%m%d'
+def path_and_rename_to_record(instance, filename):
+    upload_to = 'image/record/{}'.format(date.today().strftime("%Y%m%d"))
     ext = filename.split('.')[-1]
     # get filename
     if instance.pk:
         filename = '{}.{}'.format(instance.pk, ext)
     else:
         # set filename as random string
-        filename = '{}.{}'.format(uuid.uuid4())
+        filename = '{}.{}'.format(uuid.uuid4(), ext)
     # return the whole path to the file
     return os.path.join(upload_to, filename)
 
@@ -94,7 +116,7 @@ class Answer(models.Model):
 
     form = models.ForeignKey(Form, on_delete=models.CASCADE, verbose_name="Form")
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Created By")
-    image = models.ImageField(upload_to=path_and_rename, blank=True, null=True)
+    image = models.ImageField(upload_to=path_and_rename_to_record, blank=True, null=True)
 
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)

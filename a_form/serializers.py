@@ -3,7 +3,8 @@ from rest_framework.relations import PrimaryKeyRelatedField
 
 from a_account.models import User
 from a_account.serializers import UserSerializer
-from a_form.models import Room, Equipment, Form, Question, FormEquipment, FormQuestion, Answer, AnswerQuestion
+from a_form.models import Room, Equipment, Form, Question, FormEquipment, FormQuestion, Answer, AnswerQuestion, \
+    EquipmentImage
 
 
 class RoomSerializer(serializers.Serializer):
@@ -103,4 +104,10 @@ class AnswerSerializer(serializers.ModelSerializer):
 class AnswerQuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = AnswerQuestion
+        fields = '__all__'
+
+
+class EquipmentImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EquipmentImage
         fields = '__all__'

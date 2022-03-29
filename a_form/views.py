@@ -1,5 +1,5 @@
 import json
-
+from PIL import Image
 from django.http import Http404
 from django.db.models import Q
 from rest_framework.parsers import FormParser, MultiPartParser
@@ -8,7 +8,8 @@ from rest_framework.views import APIView
 
 from a_api.permissions import ManagerPermission
 from a_form.serializers import (RoomSerializer, EquipmentSerializer, FormSerializer, QuestionSerializer,
-                                AnswerSerializer, FormEquipmentSerializer, FormQuestionSerializer)
+                                AnswerSerializer, FormEquipmentSerializer, FormQuestionSerializer,
+                                EquipmentImageSerializer)
 from a_form.models import (Room, Equipment, Form, Question, Answer, FormEquipment, FormQuestion, AnswerQuestion)
 from a_account.serializers import UserSerializer
 from a_account.models import User
@@ -220,6 +221,17 @@ class EquipmentDetailView(APIView):
         equipment = self.get_object(pk)
         equipment.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class EquipmentImageView(APIView):
+    permission_classes = [ManagerPermission]
+
+    def post(self, request):
+        serializer = EquipmentImageSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": "Equipment Image Added"}, status=status.HTTP_204_NO_CONTENT)
+        return Response({"message": "Equipment Image Upload Failed"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class FormView(APIView):

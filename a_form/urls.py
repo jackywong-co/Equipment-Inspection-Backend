@@ -8,7 +8,7 @@ from a_form.views import (UserView, UserDetailView,
                           FormQuestionView,
                           FormEquipmentDetailView,
                           FormQuestionDetailView,
-                          AnswerView, QuestionDetailView, AnswerDetailView
+                          AnswerView, QuestionDetailView, AnswerDetailView, EquipmentImageView
                           )
 urlpatterns = [
 
@@ -20,6 +20,7 @@ urlpatterns = [
 
     path('equipment/', EquipmentView.as_view()),
     path('equipment/<str:pk>/', EquipmentDetailView.as_view()),
+    path('equipmentImage/', EquipmentImageView.as_view()),
 
     path('form/', FormView.as_view()),
     path('form/<str:pk>/', FormDetailView.as_view()),
