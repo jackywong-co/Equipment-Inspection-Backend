@@ -1,7 +1,7 @@
-import json
+from io import BytesIO
+from django.core.files.uploadedfile import InMemoryUploadedFile
 from PIL import Image
 from django.http import Http404
-from django.db.models import Q
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -10,11 +10,12 @@ from a_api.permissions import ManagerPermission
 from a_form.serializers import (RoomSerializer, EquipmentSerializer, FormSerializer, QuestionSerializer,
                                 AnswerSerializer, FormEquipmentSerializer, FormQuestionSerializer,
                                 EquipmentImageSerializer)
-from a_form.models import (Room, Equipment, Form, Question, Answer, FormEquipment, FormQuestion, AnswerQuestion)
+from a_form.models import (Room, Equipment, Form, Question, Answer, FormEquipment, FormQuestion, AnswerQuestion,
+                           EquipmentImage)
 from a_account.serializers import UserSerializer
 from a_account.models import User
 from rest_framework import status
-from django.conf import settings
+from sys import getsizeof
 
 
 # Create your views here.
@@ -227,11 +228,24 @@ class EquipmentImageView(APIView):
     permission_classes = [ManagerPermission]
 
     def post(self, request):
-        serializer = EquipmentImageSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({"message": "Equipment Image Added"}, status=status.HTTP_204_NO_CONTENT)
-        return Response({"message": "Equipment Image Upload Failed"}, status=status.HTTP_400_BAD_REQUEST)
+        pic = request.data["image"]
+        img = Image.open(pic)
+        pic_io = BytesIO()
+        img.save(pic_io, format='PNG')
+        pic_io.seek(0)
+        pic_file = InMemoryUploadedFile(
+            file=pic_io,
+            field_name=None,
+            name="%s.png" % pic.name.split('.')[0],
+            content_type='image/png',
+            size=getsizeof(pic_io),
+            charset=None,
+        )
+        equipment = Equipment.objects.get(id=request.data['equipment'])
+        equipmentImage = EquipmentImage.objects.create(equipment=equipment, image=pic_file)
+        equipmentImage.save()
+
+        return Response({"message": "Equipment Image Upload Success"})
 
 
 class FormView(APIView):
@@ -532,14 +546,40 @@ class AnswerView(APIView):
         return Response(answer_arr)
 
     def post(self, request):
-        serializer = AnswerSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            answer = Answer.objects.get(id=serializer.data.get('id'))
-            question = Question.objects.get(id=request.data['question'])
-            AnswerQuestion.objects.create(answers=answer, questions=question)
-            return Response({"message": "Record Created"}, status=status.HTTP_204_NO_CONTENT)
-        return Response({"message": "Record Create Failed"}, status=status.HTTP_400_BAD_REQUEST)
+        answer_text = request.data['answer_text']
+        pic = request.data["image"]
+        img = Image.open(pic)
+        pic_io = BytesIO()
+        img.save(pic_io, format='PNG')
+        pic_io.seek(0)
+        pic_file = InMemoryUploadedFile(
+            file=pic_io,
+            field_name=None,
+            name="%s.png" % pic.name.split('.')[0],
+            content_type='image/png',
+            size=getsizeof(pic_io),
+            charset=None,
+        )
+        form = Form.objects.get(id=request.data['form'])
+        created_by = User.objects.get(id=request.data['created_by'])
+        answer = Answer.objects.create(answer_text=answer_text, image=pic_file,
+                                       form=form, created_by=created_by)
+        question = Question.objects.get(id=request.data['question'])
+        AnswerQuestion.objects.create(answers=answer, questions=question)
+        # answer = Answer.objects.get(id=serializer.data.get('id'))
+        # equipment = Equipment.objects.get(id=request.data['equipment'])
+        # equipmentImage = EquipmentImage.objects.create(equipment=equipment, image=pic_file)
+        # equipmentImage.save()
+        #
+        # return Response({"message": "Equipment Image Upload Success"})
+        # serializer = AnswerSerializer(data=request.data)
+        # if serializer.is_valid():
+        #     serializer.save()
+        #     answer = Answer.objects.get(id=serializer.data.get('id'))
+        #     question = Question.objects.get(id=request.data['question'])
+        #     AnswerQuestion.objects.create(answers=answer, questions=question)
+        #     return Response({"message": "Record Created"}, status=status.HTTP_204_NO_CONTENT)
+        return Response({"message": "Record Create Success"})
 
 
 class AnswerDetailView(APIView):

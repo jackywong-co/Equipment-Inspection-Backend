@@ -1,5 +1,7 @@
 import os
 import uuid
+
+from PIL import Image
 from django.db import models
 from a_account.models import User
 from datetime import date
