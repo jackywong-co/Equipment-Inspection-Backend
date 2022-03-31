@@ -18,6 +18,10 @@ from rest_framework import status
 from sys import getsizeof
 
 
+def remove_first_end_spaces(string):
+    return "".join(string.rstrip().lstrip())
+
+
 # Create your views here.
 class UserView(APIView):
     permission_classes = [ManagerPermission]
@@ -85,6 +89,7 @@ class RoomView(APIView):
     def post(self, request):
         room_data = request.data
         room_name = room_data["room_name"]
+        room_name = remove_first_end_spaces(room_name).replace(" ", "_")
         location = room_data["location"]
         Room.objects.create(room_name=room_name, location=location)
         return Response({"message": "room created"}, status=status.HTTP_204_NO_CONTENT)
@@ -147,7 +152,7 @@ class EquipmentView(APIView):
             equipment_arr.append(
                 {
                     "equipment_id": equipment.id,
-                    "equipment_name": equipment.equipment_name,
+                    "equipment_name": equipment.equipment_name.replace("_", " "),
                     "equipment_code": equipment.equipment_code,
                     "is_active": equipment.is_active,
                     "room_id": equipment.room.id,
@@ -159,6 +164,7 @@ class EquipmentView(APIView):
     def post(self, request):
         equipment_data = request.data
         equipment_name = equipment_data["equipment_name"]
+        equipment_name = remove_first_end_spaces(equipment_name).replace(" ", "_")
         equipment_code = equipment_data["equipment_code"]
         room = Room.objects.get(id=equipment_data["room"])
         Equipment.objects.create(equipment_name=equipment_name, equipment_code=equipment_code, room=room)
@@ -547,19 +553,24 @@ class AnswerView(APIView):
 
     def post(self, request):
         answer_text = request.data['answer_text']
-        pic = request.data["image"]
-        img = Image.open(pic)
-        pic_io = BytesIO()
-        img.save(pic_io, format='PNG')
-        pic_io.seek(0)
-        pic_file = InMemoryUploadedFile(
-            file=pic_io,
-            field_name=None,
-            name="%s.png" % pic.name.split('.')[0],
-            content_type='image/png',
-            size=getsizeof(pic_io),
-            charset=None,
-        )
+        # if "equipment_code" in equipment_data:
+        #     equipment.equipment_code = equipment_data["equipment_code"]
+        if 'image' in request.data:
+            pic = request.data['image']
+            img = Image.open(pic)
+            pic_io = BytesIO()
+            img.save(pic_io, format='PNG')
+            pic_io.seek(0)
+            pic_file = InMemoryUploadedFile(
+                file=pic_io,
+                field_name=None,
+                name="%s.png" % pic.name.split('.')[0],
+                content_type='image/png',
+                size=getsizeof(pic_io),
+                charset=None,
+            )
+        else:
+            pic_file = ""
         form = Form.objects.get(id=request.data['form'])
         created_by = User.objects.get(id=request.data['created_by'])
         answer = Answer.objects.create(answer_text=answer_text, image=pic_file,

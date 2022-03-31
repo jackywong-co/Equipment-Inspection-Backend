@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from rest_framework.response import Response
 
-data_dir = 'C:/Users/Jacky/Desktop/equipment_inspection_backend/media/image/equipment'
+data_dir = './media/image/equipment'
 batch_size = 32
 img_height = 180
 img_width = 180
@@ -13,7 +13,6 @@ img_width = 180
 class TrainingView(APIView):
     def post(self, request):
         print(data_dir)
-
         train_ds = tf.keras.utils.image_dataset_from_directory(
             data_dir,
             validation_split=0.2,
@@ -88,7 +87,7 @@ class PredictView(APIView):
 
     def post(self, request):
         img = tf.keras.utils.load_img(
-            'C:/Users/Jacky/Desktop/equipment_inspection_backend/media/image/equipment/Sauna@Timer/003.png',
+            './media/image/equipment/Sauna@Lighting/3bc392a0-9754-4362-afb2-eb5787b4ea81.png',
             target_size=(img_height, img_width)
         )
         img_array = tf.keras.utils.img_to_array(img)
@@ -99,6 +98,4 @@ class PredictView(APIView):
         train_ds = tf.keras.utils.image_dataset_from_directory(
             data_dir)
         class_names = train_ds.class_names
-        print(class_names)
-        print(score)
         return Response({"belongs to": class_names[np.argmax(score)], "confidence": 100 * np.max(score)})
