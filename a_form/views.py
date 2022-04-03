@@ -522,9 +522,14 @@ class AnswerView(APIView):
         for answer in answer_all:
             answer_question = AnswerQuestion.objects.get(answers=answer)
             question = Question.objects.get(id=answer_question.questions.id)
-            image = ""
             if answer.image:
                 image = answer.image.url
+            else:
+                image = ""
+            if answer.signature:
+                signature = answer.signature.url
+            else:
+                signature = ""
             form_equipment = FormEquipment.objects.get(forms=answer.form)
             equipment = Equipment.objects.get(id=form_equipment.equipments.id)
             answer_arr.append(
@@ -532,6 +537,7 @@ class AnswerView(APIView):
                     "id": answer.id,
                     "answer_text": answer.answer_text,
                     "image": image,
+                    "signature": signature,
                     "created_by": {
                         "id": answer.created_by_id,
                         "username": answer.created_by.username
@@ -553,8 +559,6 @@ class AnswerView(APIView):
 
     def post(self, request):
         answer_text = request.data['answer_text']
-        # if "equipment_code" in equipment_data:
-        #     equipment.equipment_code = equipment_data["equipment_code"]
         if 'image' in request.data:
             pic = request.data['image']
             img = Image.open(pic)
@@ -571,25 +575,17 @@ class AnswerView(APIView):
             )
         else:
             pic_file = ""
+
+        if "signature" in request.data:
+            signature = request.data['signature']
+        else:
+            signature = ""
         form = Form.objects.get(id=request.data['form'])
         created_by = User.objects.get(id=request.data['created_by'])
-        answer = Answer.objects.create(answer_text=answer_text, image=pic_file,
+        answer = Answer.objects.create(answer_text=answer_text, image=pic_file, signature=signature,
                                        form=form, created_by=created_by)
         question = Question.objects.get(id=request.data['question'])
         AnswerQuestion.objects.create(answers=answer, questions=question)
-        # answer = Answer.objects.get(id=serializer.data.get('id'))
-        # equipment = Equipment.objects.get(id=request.data['equipment'])
-        # equipmentImage = EquipmentImage.objects.create(equipment=equipment, image=pic_file)
-        # equipmentImage.save()
-        #
-        # return Response({"message": "Equipment Image Upload Success"})
-        # serializer = AnswerSerializer(data=request.data)
-        # if serializer.is_valid():
-        #     serializer.save()
-        #     answer = Answer.objects.get(id=serializer.data.get('id'))
-        #     question = Question.objects.get(id=request.data['question'])
-        #     AnswerQuestion.objects.create(answers=answer, questions=question)
-        #     return Response({"message": "Record Created"}, status=status.HTTP_204_NO_CONTENT)
         return Response({"message": "Record Create Success"})
 
 
