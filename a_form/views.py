@@ -106,12 +106,28 @@ class RoomDetailView(APIView):
 
     def get(self, request, pk):
         room = self.get_object(pk)
+        equipment_arr = []
+        for equipment in Equipment.objects.filter(room=room):
+            equipment_arr.append(
+                {
+                    "equipment_id": equipment.id,
+                    "equipment_name": equipment.equipment_name.replace("_", " "),
+                    "equipment_code": equipment.equipment_code,
+                    "is_active": equipment.is_active,
+                    "room_id": equipment.room.id,
+                    "room_name": equipment.room.room_name
+                }
+            )
         return Response(
-            {"id": room.id,
-             "room_name": room.room_name,
-             "location": room.location,
-             "is_active": room.is_active
-             }
+            [
+                {
+                    "id": room.id,
+                    "room_name": room.room_name,
+                    "location": room.location,
+                    "equipments": equipment_arr,
+                    "is_active": room.is_active
+                }
+            ]
         )
 
     def put(self, request, pk):
