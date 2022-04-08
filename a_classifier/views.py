@@ -12,7 +12,7 @@ img_width = 180
 
 class TrainingView(APIView):
     def post(self, request):
-        print(data_dir)
+        # print(data_dir)
         train_ds = tf.keras.utils.image_dataset_from_directory(
             data_dir,
             validation_split=0.2,
