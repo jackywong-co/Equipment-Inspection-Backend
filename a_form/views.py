@@ -72,7 +72,9 @@ class RoomView(APIView):
             for equipment in Equipment.objects.filter(room=room):
                 equipment_arr.append(
                     {
-                        "equipment_id": equipment.id
+                        "equipment_id": equipment.id,
+                        "equipment_name": equipment.equipment_name,
+                        "equipment_code": equipment.equipment_code
                     }
                 )
             room_arr.append(

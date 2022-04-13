@@ -86,10 +86,14 @@ class TrainingView(APIView):
 class PredictView(APIView):
 
     def post(self, request):
+        if 'image' in request.data:
+            pic = request.data['image']
+            print('have image')
         img = tf.keras.utils.load_img(
-            './media/image/equipment/Sauna@Lighting/3bc392a0-9754-4362-afb2-eb5787b4ea81.png',
+            './media/image/equipment/Sauna@Lighting/1f59f8f4-f0ac-418f-a47f-3e8ff88bc5ce.png',
             target_size=(img_height, img_width)
         )
+        print('image 123')
         img_array = tf.keras.utils.img_to_array(img)
         img_array = tf.expand_dims(img_array, 0)  # Create a batch
         model = tf.keras.models.load_model('./a_classifier/model')
