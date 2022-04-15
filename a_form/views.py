@@ -681,8 +681,6 @@ class EquipmentToFromView(APIView):
                     "equipment_id": form_equipment.equipments.id,
                     "equipment_name": form_equipment.equipments.equipment_name,
                     "equipment_code": form_equipment.equipments.equipment_code,
-                    "room_id": form_equipment.equipments.room.id,
-                    "room_name": form_equipment.equipments.room.room_name,
                 }
             )
         form_question = FormQuestion.objects.filter(forms=form_equipment.forms)
@@ -695,15 +693,17 @@ class EquipmentToFromView(APIView):
                 }
             )
         return Response(
-            [{
-                "form_id": form_equipment.forms.id,
-                "form_name": form_equipment.forms.form_name,
-                "created_by_id": form_equipment.forms.created_by.id,
-                "created_by_name": form_equipment.forms.created_by.username,
-                "equipments": equipment_arr,
-                "questions": question_arr,
-                "is_active": form_equipment.forms.is_active
-            }]
+            [
+                {
+                    "form_id": form_equipment.forms.id,
+                    "form_name": form_equipment.forms.form_name,
+                    "created_by_id": form_equipment.forms.created_by.id,
+                    "created_by_name": form_equipment.forms.created_by.username,
+                    "equipments": equipment_arr,
+                    "questions": question_arr,
+                    "is_active": form_equipment.forms.is_active
+                }
+            ]
         )
 
 
@@ -735,6 +735,9 @@ class RoomToFromView(APIView):
                 form_arr.append(
                     {
                         "form_id": form_equipment.forms.id,
+                        "form_name": form_equipment.forms.form_name,
+                        "created_by_id": form_equipment.forms.created_by.id,
+                        "created_by_name": form_equipment.forms.created_by.username,
                         "equipments": [
                             {
                                 "equipment_id": form_equipment.equipments.id,
@@ -743,6 +746,7 @@ class RoomToFromView(APIView):
                             }
                         ],
                         "questions": question_arr,
+                        "is_active": form_equipment.forms.is_active
                     }
                 )
 
