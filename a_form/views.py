@@ -659,3 +659,91 @@ class AnswerDetailView(APIView):
         answer = self.get_object(pk)
         answer.delete()
         return Response({"message": "record deleted"}, status=status.HTTP_204_NO_CONTENT)
+
+
+class EquipmentToFromView(APIView):
+    permission_classes = [ManagerPermission]
+    parser_classes = [MultiPartParser, FormParser]
+
+    def get_object(self, pk):
+        try:
+            return Equipment.objects.get(pk=pk)
+        except Equipment.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk):
+        equipment = self.get_object(pk)
+        form_equipment = FormEquipment.objects.filter(equipments=equipment)
+        equipment_arr = []
+        for form_equipment in form_equipment:
+            equipment_arr.append(
+                {
+                    "equipment_id": form_equipment.equipments.id,
+                    "equipment_name": form_equipment.equipments.equipment_name,
+                    "equipment_code": form_equipment.equipments.equipment_code,
+                    "room_id": form_equipment.equipments.room.id,
+                    "room_name": form_equipment.equipments.room.room_name,
+                }
+            )
+        form_question = FormQuestion.objects.filter(forms=form_equipment.forms)
+        question_arr = []
+        for form_questions in form_question:
+            question_arr.append(
+                {
+                    "question_id": form_questions.questions.id,
+                    "question_text": form_questions.questions.question_text
+                }
+            )
+        return Response(
+            [{
+                "form_id": form_equipment.forms.id,
+                "form_name": form_equipment.forms.form_name,
+                "created_by_id": form_equipment.forms.created_by.id,
+                "created_by_name": form_equipment.forms.created_by.username,
+                "equipments": equipment_arr,
+                "questions": question_arr,
+                "is_active": form_equipment.forms.is_active
+            }]
+        )
+
+
+class RoomToFromView(APIView):
+    permission_classes = [ManagerPermission]
+    parser_classes = [MultiPartParser, FormParser]
+
+    def get_object(self, pk):
+        try:
+            return Room.objects.get(pk=pk)
+        except Room.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk):
+        room = self.get_object(pk)
+        form_arr = []
+        for equipment in Equipment.objects.filter(room=room):
+            form_equipment = FormEquipment.objects.filter(equipments=equipment)
+            for form_equipment in form_equipment:
+                form_question = FormQuestion.objects.filter(forms=form_equipment.forms)
+                question_arr = []
+                for form_questions in form_question:
+                    question_arr.append(
+                        {
+                            "question_id": form_questions.questions.id,
+                            "question_text": form_questions.questions.question_text
+                        }
+                    )
+                form_arr.append(
+                    {
+                        "form_id": form_equipment.forms.id,
+                        "equipments": [
+                            {
+                                "equipment_id": form_equipment.equipments.id,
+                                "equipment_name": form_equipment.equipments.equipment_name,
+                                "equipment_code": form_equipment.equipments.equipment_code,
+                            }
+                        ],
+                        "questions": question_arr,
+                    }
+                )
+
+        return Response(form_arr)
