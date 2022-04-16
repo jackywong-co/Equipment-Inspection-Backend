@@ -252,6 +252,7 @@ class EquipmentImageView(APIView):
     permission_classes = [ManagerPermission]
 
     def post(self, request):
+        print(request.data)
         pic = request.data["image"]
         img = Image.open(pic)
         pic_io = BytesIO()
@@ -522,7 +523,7 @@ class QuestionDetailView(APIView):
         else:
             question.id = question.id
         question.save()
-        return Response({"message": "question updated"}, status=status.HTTP_204_NO_CONTENT)
+        return Response({"message": "question updated"})
 
     def delete(self, request, pk):
         question = self.get_object(pk)
