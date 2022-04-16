@@ -97,14 +97,28 @@ class PredictView(APIView):
         if 'image' in request.data:
             pic = request.data['image']
             img = Image.open(pic).resize((img_height, img_width), Image.ANTIALIAS)
-            print('have image')
             img_array = tf.keras.utils.img_to_array(img)
             img_array = tf.expand_dims(img_array, 0)  # Create a batch
             model = tf.keras.models.load_model('./a_classifier/model')
             predictions = model.predict(img_array)
-            score = tf.nn.softmax(predictions[0])
+            score = tf.nn.softmax(predictions[0]).numpy()
             train_ds = tf.keras.utils.image_dataset_from_directory(
                 data_dir)
             class_names = train_ds.class_names
-            return Response({"belongs to": class_names[np.argmax(score)], "confidence": 100 * np.max(score)})
+            return Response(
+                [
+                    {
+                        "equipment": class_names[np.argsort(score, axis=0)[-1]],
+                        "confidence": 100 * score[np.argsort(score, axis=0)[-1]]
+                    },
+                    {
+                        "equipment": class_names[np.argsort(score, axis=0)[-2]],
+                        "confidence": 100 * score[np.argsort(score, axis=0)[-2]]
+                    },
+                    {
+                        "equipment": class_names[np.argsort(score, axis=0)[-3]],
+                        "confidence": 100 * score[np.argsort(score, axis=0)[-3]]
+                    }
+                ]
+            )
         return Response({"message": "image no found"})
