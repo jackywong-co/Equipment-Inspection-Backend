@@ -73,14 +73,14 @@ class RoomView(APIView):
                 equipment_arr.append(
                     {
                         "equipment_id": equipment.id,
-                        "equipment_name": equipment.equipment_name,
+                        "equipment_name": equipment.equipment_name.replace("_", " "),
                         "equipment_code": equipment.equipment_code
                     }
                 )
             room_arr.append(
                 {
                     "id": room.id,
-                    "room_name": room.room_name,
+                    "room_name": room.room_name.replace("_", " "),
                     "location": room.location,
                     "equipments": equipment_arr,
                     "is_active": room.is_active
