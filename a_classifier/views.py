@@ -1,8 +1,11 @@
+from PIL import Image
 from rest_framework.views import APIView
 import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
 from rest_framework.response import Response
+from rest_framework.parsers import FormParser, MultiPartParser
+from a_api.permissions import ManagerPermission
 
 data_dir = './media/image/equipment'
 batch_size = 32
@@ -11,6 +14,9 @@ img_width = 180
 
 
 class TrainingView(APIView):
+    permission_classes = [ManagerPermission]
+    parser_classes = [MultiPartParser, FormParser]
+
     def post(self, request):
         # print(data_dir)
         train_ds = tf.keras.utils.image_dataset_from_directory(
@@ -84,16 +90,19 @@ class TrainingView(APIView):
 
 
 class PredictView(APIView):
+    permission_classes = [ManagerPermission]
+    parser_classes = [MultiPartParser, FormParser]
 
     def post(self, request):
-        if 'image' in request.data:
-            pic = request.data['image']
-            print('have image')
         img = tf.keras.utils.load_img(
             './media/image/equipment/Sauna@Lighting/1f59f8f4-f0ac-418f-a47f-3e8ff88bc5ce.png',
             target_size=(img_height, img_width)
         )
-        print('image 123')
+        print(request.data)
+        if 'image' in request.data:
+            pic = request.data['image']
+            img = Image.open(pic).resize((img_height, img_width), Image.ANTIALIAS)
+            print('have image')
         img_array = tf.keras.utils.img_to_array(img)
         img_array = tf.expand_dims(img_array, 0)  # Create a batch
         model = tf.keras.models.load_model('./a_classifier/model')

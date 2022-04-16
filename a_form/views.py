@@ -576,6 +576,7 @@ class AnswerView(APIView):
         return Response(answer_arr)
 
     def post(self, request):
+        print(request.data)
         answer_text = request.data['answer_text']
         if 'image' in request.data:
             pic = request.data['image']
@@ -593,7 +594,7 @@ class AnswerView(APIView):
             )
         else:
             pic_file = ""
-
+  
         if "signature" in request.data:
             signature = request.data['signature']
         else:
