@@ -594,7 +594,7 @@ class AnswerView(APIView):
             )
         else:
             pic_file = ""
-  
+
         if "signature" in request.data:
             signature = request.data['signature']
         else:

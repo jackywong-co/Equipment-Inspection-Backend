@@ -94,21 +94,17 @@ class PredictView(APIView):
     parser_classes = [MultiPartParser, FormParser]
 
     def post(self, request):
-        img = tf.keras.utils.load_img(
-            './media/image/equipment/Sauna@Lighting/1f59f8f4-f0ac-418f-a47f-3e8ff88bc5ce.png',
-            target_size=(img_height, img_width)
-        )
-        print(request.data)
         if 'image' in request.data:
             pic = request.data['image']
             img = Image.open(pic).resize((img_height, img_width), Image.ANTIALIAS)
             print('have image')
-        img_array = tf.keras.utils.img_to_array(img)
-        img_array = tf.expand_dims(img_array, 0)  # Create a batch
-        model = tf.keras.models.load_model('./a_classifier/model')
-        predictions = model.predict(img_array)
-        score = tf.nn.softmax(predictions[0])
-        train_ds = tf.keras.utils.image_dataset_from_directory(
-            data_dir)
-        class_names = train_ds.class_names
-        return Response({"belongs to": class_names[np.argmax(score)], "confidence": 100 * np.max(score)})
+            img_array = tf.keras.utils.img_to_array(img)
+            img_array = tf.expand_dims(img_array, 0)  # Create a batch
+            model = tf.keras.models.load_model('./a_classifier/model')
+            predictions = model.predict(img_array)
+            score = tf.nn.softmax(predictions[0])
+            train_ds = tf.keras.utils.image_dataset_from_directory(
+                data_dir)
+            class_names = train_ds.class_names
+            return Response({"belongs to": class_names[np.argmax(score)], "confidence": 100 * np.max(score)})
+        return Response({"message": "image no found"})
