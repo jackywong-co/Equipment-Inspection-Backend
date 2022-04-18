@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from rest_framework.response import Response
 from rest_framework.parsers import FormParser, MultiPartParser
 from a_api.permissions import ManagerPermission
+from a_form.models import Equipment, Room
 
 data_dir = './media/image/equipment'
 batch_size = 32
@@ -105,19 +106,40 @@ class PredictView(APIView):
             train_ds = tf.keras.utils.image_dataset_from_directory(
                 data_dir)
             class_names = train_ds.class_names
+            equipment1 = class_names[np.argsort(score, axis=0)[-1]]
+            equipment1 = equipment1.split("@")
+            equipment1 = Equipment.objects.filter(equipment_name=equipment1[1])
+            equipment2 = class_names[np.argsort(score, axis=0)[-2]]
+            equipment2 = equipment2.split("@")
+            equipment2 = Equipment.objects.filter(equipment_name=equipment2[1])
+            equipment3 = class_names[np.argsort(score, axis=0)[-2]]
+            equipment3 = equipment3.split("@")
+            equipment3 = Equipment.objects.filter(equipment_name=equipment3[1])
             return Response(
                 [
                     {
-                        "equipment": class_names[np.argsort(score, axis=0)[-1]],
-                        "confidence": 100 * score[np.argsort(score, axis=0)[-1]]
+                        "equipment_id": equipment1[0].id,
+                        "equipment_name": equipment1[0].equipment_name.replace("_", " "),
+                        "confidence": 100 * score[np.argsort(score, axis=0)[-1]],
+                        "equipment_code": equipment1[0].equipment_code,
+                        "room_id": equipment1[0].room.id,
+                        "room_name": equipment1[0].room.room_name.replace("_", " "),
                     },
                     {
-                        "equipment": class_names[np.argsort(score, axis=0)[-2]],
-                        "confidence": 100 * score[np.argsort(score, axis=0)[-2]]
+                        "equipment_id": equipment2[0].id,
+                        "equipment_name": equipment2[0].equipment_name.replace("_", " "),
+                        "confidence": 100 * score[np.argsort(score, axis=0)[-2]],
+                        "equipment_code": equipment2[0].equipment_code,
+                        "room_id": equipment2[0].room.id,
+                        "room_name": equipment2[0].room.room_name.replace("_", " "),
                     },
                     {
-                        "equipment": class_names[np.argsort(score, axis=0)[-3]],
-                        "confidence": 100 * score[np.argsort(score, axis=0)[-3]]
+                        "equipment_id": equipment3[0].id,
+                        "equipment_name": equipment3[0].equipment_name.replace("_", " "),
+                        "confidence": 100 * score[np.argsort(score, axis=0)[-3]],
+                        "equipment_code": equipment3[0].equipment_code,
+                        "room_id": equipment3[0].room.id,
+                        "room_name": equipment3[0].room.room_name.replace("_", " "),
                     }
                 ]
             )
