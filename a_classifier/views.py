@@ -108,13 +108,13 @@ class PredictView(APIView):
             class_names = train_ds.class_names
             equipment1 = class_names[np.argsort(score, axis=0)[-1]]
             equipment1 = equipment1.split("@")
-            equipment1 = Equipment.objects.filter(equipment_name=equipment1[1])
+            equipment1 = Equipment.objects.filter(equipment_name=equipment1[1], room__room_name=equipment1[0])
             equipment2 = class_names[np.argsort(score, axis=0)[-2]]
             equipment2 = equipment2.split("@")
-            equipment2 = Equipment.objects.filter(equipment_name=equipment2[1])
+            equipment2 = Equipment.objects.filter(equipment_name=equipment2[1], room__room_name=equipment2[0])
             equipment3 = class_names[np.argsort(score, axis=0)[-2]]
             equipment3 = equipment3.split("@")
-            equipment3 = Equipment.objects.filter(equipment_name=equipment3[1])
+            equipment3 = Equipment.objects.filter(equipment_name=equipment3[1], room__room_name=equipment3[0])
             return Response(
                 [
                     {
