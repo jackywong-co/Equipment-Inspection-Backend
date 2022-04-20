@@ -753,3 +753,16 @@ class RoomToFromView(APIView):
                 )
 
         return Response(form_arr)
+
+class ExportPDFView(APIView):
+    permission_classes = [ManagerPermission]
+    parser_classes = [MultiPartParser, FormParser]
+
+    def get_object(self, pk):
+        try:
+            return Room.objects.get(pk=pk)
+        except Room.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk):
+        room = self.get_object(pk)
