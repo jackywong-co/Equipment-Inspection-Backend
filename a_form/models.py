@@ -125,12 +125,20 @@ def path_and_rename_to_record_signature(instance, filename):
     return os.path.join(upload_to, filename)
 
 
+class UniqueId(models.Model):
+    id = models.UUIDField(primary_key=True, auto_created=True, default=uuid.uuid4, editable=False)
+
+    def __str__(self):
+        return self.id
+
+
 class Answer(models.Model):
     id = models.UUIDField(primary_key=True, auto_created=True, default=uuid.uuid4, editable=False)
     answer_text = models.CharField(max_length=30, null=True, blank=True)
 
     form = models.ForeignKey(Form, on_delete=models.CASCADE, verbose_name="Form")
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Created By")
+    unique_id = models.ForeignKey(UniqueId, on_delete=models.CASCADE, verbose_name="Unique")
     image = models.ImageField(upload_to=path_and_rename_to_record, blank=True, null=True)
     signature = models.ImageField(upload_to=path_and_rename_to_record_signature, blank=True, null=True)
 

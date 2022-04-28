@@ -11,7 +11,7 @@ from a_form.serializers import (RoomSerializer, EquipmentSerializer, FormSeriali
                                 AnswerSerializer, FormEquipmentSerializer, FormQuestionSerializer,
                                 EquipmentImageSerializer)
 from a_form.models import (Room, Equipment, Form, Question, Answer, FormEquipment, FormQuestion, AnswerQuestion,
-                           EquipmentImage)
+                           EquipmentImage, UniqueId)
 from a_account.serializers import UserSerializer
 from a_account.models import User
 from rest_framework import status
@@ -305,10 +305,12 @@ class FormView(APIView):
                         "question_text": form_questions.questions.question_text
                     }
                 )
+            unique_id = UniqueId.objects.create();
             form_arr.append(
                 {
                     "form_id": form.id,
                     "form_name": form.form_name,
+                    "unique_id": unique_id.id,
                     "created_by": user,
                     "equipments": equipment_arr,
                     "questions": question_arr,
@@ -577,8 +579,9 @@ class AnswerView(APIView):
         return Response(answer_arr)
 
     def post(self, request):
-        print(request.data)
         answer_text = request.data['answer_text']
+        unique_id = request.data['unique_id']
+        unique_id = UniqueId.objects.get(id=unique_id)
         if 'image' in request.data:
             pic = request.data['image']
             img = Image.open(pic)
@@ -595,18 +598,29 @@ class AnswerView(APIView):
             )
         else:
             pic_file = ""
-
         if "signature" in request.data:
+            # pic = request.data['signature']
+            # img = Image.open(pic)
+            # pic_io = BytesIO()
+            # img.save(pic_io, format='PNG')
+            # signature = InMemoryUploadedFile(
+            #     file=pic_io,
+            #     field_name=None,
+            #     name="%s.png" % pic.name.split('.')[0],
+            #     content_type='image/png',
+            #     size=getsizeof(pic_io),
+            #     charset=None,
+            # )
             signature = request.data['signature']
         else:
             signature = ""
         form = Form.objects.get(id=request.data['form'])
         created_by = User.objects.get(id=request.data['created_by'])
         answer = Answer.objects.create(answer_text=answer_text, image=pic_file, signature=signature,
-                                       form=form, created_by=created_by)
+                                       form=form, created_by=created_by, unique_id=unique_id)
         question = Question.objects.get(id=request.data['question'])
         AnswerQuestion.objects.create(answers=answer, questions=question)
-        return Response({"message": "Record Create Success"})
+        return Response(request.data)
 
 
 class AnswerDetailView(APIView):
@@ -734,10 +748,12 @@ class RoomToFromView(APIView):
                             "question_text": form_questions.questions.question_text
                         }
                     )
+                unique_id = UniqueId.objects.create();
                 form_arr.append(
                     {
                         "form_id": form_equipment.forms.id,
                         "form_name": form_equipment.forms.form_name,
+                        "unique_id": unique_id.id,
                         "created_by_id": form_equipment.forms.created_by.id,
                         "created_by_name": form_equipment.forms.created_by.username,
                         "equipments": [
@@ -753,6 +769,7 @@ class RoomToFromView(APIView):
                 )
 
         return Response(form_arr)
+
 
 class ExportPDFView(APIView):
     permission_classes = [ManagerPermission]
