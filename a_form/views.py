@@ -1,7 +1,9 @@
+import io
 from io import BytesIO
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from PIL import Image
-from django.http import Http404
+from django.db.models import Count
+from django.http import Http404, FileResponse
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -16,6 +18,8 @@ from a_account.serializers import UserSerializer
 from a_account.models import User
 from rest_framework import status
 from sys import getsizeof
+# create pdf
+from reportlab.pdfgen import canvas
 
 
 def remove_first_end_spaces(string):
@@ -599,19 +603,18 @@ class AnswerView(APIView):
         else:
             pic_file = ""
         if "signature" in request.data:
-            # pic = request.data['signature']
-            # img = Image.open(pic)
-            # pic_io = BytesIO()
-            # img.save(pic_io, format='PNG')
-            # signature = InMemoryUploadedFile(
-            #     file=pic_io,
-            #     field_name=None,
-            #     name="%s.png" % pic.name.split('.')[0],
-            #     content_type='image/png',
-            #     size=getsizeof(pic_io),
-            #     charset=None,
-            # )
-            signature = request.data['signature']
+            pic = request.data['signature']
+            img = Image.open(pic)
+            pic_io = BytesIO()
+            img.save(pic_io, format='PNG')
+            signature = InMemoryUploadedFile(
+                file=pic_io,
+                field_name=None,
+                name="%s.png" % pic.name.split('.')[0],
+                content_type='image/png',
+                size=getsizeof(pic_io),
+                charset=None,
+            )
         else:
             signature = ""
         form = Form.objects.get(id=request.data['form'])
@@ -771,15 +774,65 @@ class RoomToFromView(APIView):
         return Response(form_arr)
 
 
+class ListReport(APIView):
+    permission_classes = [ManagerPermission]
+    parser_classes = [MultiPartParser, FormParser]
+
+    def get(self, request):
+        lists = (Answer.objects.values('unique_id_id').annotate(dcount=Count('unique_id_id'))).order_by()
+        i = []
+        for l in lists:
+            re = Answer.objects.filter(unique_id=l["unique_id_id"])[:1]
+            for x in re:
+                formEquipment = FormEquipment.objects.get(forms_id=x.form.id)
+                i.append({
+                    "unique_id": x.unique_id.id,
+                    "room_id": formEquipment.equipments.room.id,
+                    "room_name": formEquipment.equipments.room.room_name,
+                })
+
+        return Response(i)
+
+
 class ExportPDFView(APIView):
     permission_classes = [ManagerPermission]
     parser_classes = [MultiPartParser, FormParser]
 
     def get_object(self, pk):
         try:
-            return Room.objects.get(pk=pk)
-        except Room.DoesNotExist:
+            return UniqueId.objects.get(pk=pk)
+        except UniqueId.DoesNotExist:
             raise Http404
 
     def get(self, request, pk):
-        room = self.get_object(pk)
+        unique_id = self.get_object(pk)
+        answer_list = Answer.objects.filter(unique_id=unique_id)
+        response = []
+        for a in answer_list:
+            formEquipment = FormEquipment.objects.get(forms_id=a.form.id)
+            response.append(
+                {
+                    "room_id": formEquipment.equipments.room.id,
+                    "room_name": formEquipment.equipments.room.room_name,
+                    "use": a.id
+                }
+            )
+        print(response)
+        formEquipmenta = FormEquipment.objects.get(forms_id=answer_list[0].form.id)
+        buffer = io.BytesIO()
+        c = canvas.Canvas(buffer)
+        c.setFont("Courier", 32)
+        c.drawCentredString(300, 800, '{} Form'.format(formEquipmenta.equipments.room.room_name))
+        c.setFont("Courier", 20)
+        c.drawString(100, 770, 'This Inspected By: {}'.format(answer_list[0].created_by))
+        c.drawString(100, 740, 'Equipment: ')
+        c.setFont("Courier", 14)
+        for a in range(0, answer_list.count()):
+            formEquipment = FormEquipment.objects.get(forms_id=answer_list[a].form.id)
+            answerQuestion = AnswerQuestion.objects.get(answers_id=answer_list[a].id)
+            c.drawString(120, 720 - a * 20, '{}'.format(formEquipment.equipments.equipment_name))
+            c.drawString(420, 720 - a * 20, '{}'.format(answerQuestion.questions.question_text))
+        c.showPage()
+        c.save()
+        buffer.seek(0)
+        return FileResponse(buffer, as_attachment=True, filename='hello.pdf')

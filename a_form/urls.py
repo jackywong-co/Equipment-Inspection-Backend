@@ -9,7 +9,7 @@ from a_form.views import (UserView, UserDetailView,
                           FormEquipmentDetailView,
                           FormQuestionDetailView,
                           AnswerView, QuestionDetailView, AnswerDetailView, EquipmentImageView, EquipmentToFromView,
-                          RoomToFromView
+                          RoomToFromView, ExportPDFView, ListReport
                           )
 
 urlpatterns = [
@@ -41,4 +41,7 @@ urlpatterns = [
 
     path('equipmentToForm/<str:pk>/', EquipmentToFromView.as_view()),
     path('roomToForm/<str:pk>/', RoomToFromView.as_view()),
+
+    path('listReport/', ListReport.as_view()),
+    path('exportReport/<str:pk>/', ExportPDFView.as_view()),
 ]
