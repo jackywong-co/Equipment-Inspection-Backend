@@ -121,14 +121,14 @@ class RoomDetailView(APIView):
                     "equipment_code": equipment.equipment_code,
                     "is_active": equipment.is_active,
                     "room_id": equipment.room.id,
-                    "room_name": equipment.room.room_name
+                    "room_name": equipment.room.room_name.replace("_", " ")
                 }
             )
         return Response(
             [
                 {
                     "id": room.id,
-                    "room_name": room.room_name,
+                    "room_name": room.room_name.replace("_", " "),
                     "location": room.location,
                     "equipments": equipment_arr,
                     "is_active": room.is_active
@@ -178,7 +178,7 @@ class EquipmentView(APIView):
                     "equipment_code": equipment.equipment_code,
                     "is_active": equipment.is_active,
                     "room_id": equipment.room.id,
-                    "room_name": equipment.room.room_name
+                    "room_name": equipment.room.room_name.replace("_", " ")
                 }
             )
         return Response(equipment_arr)
@@ -817,13 +817,12 @@ class ExportPDFView(APIView):
                     "use": a.id
                 }
             )
-        print(response)
-        formEquipmenta = FormEquipment.objects.get(forms_id=answer_list[0].form.id)
         buffer = io.BytesIO()
         c = canvas.Canvas(buffer)
         c.setFont("Courier", 32)
-        c.drawCentredString(300, 800, '{} Form'.format(formEquipmenta.equipments.room.room_name))
-        c.setFont("Courier", 20)
+        c.drawCentredString(300, 800, '{} Form'.format(
+            FormEquipment.objects.get(forms_id=answer_list[0].form.id).equipments.room.room_name))
+        c.setFont("Courier", 16)
         c.drawString(100, 770, 'This Inspected By: {}'.format(answer_list[0].created_by))
         c.drawString(100, 740, 'Equipment: ')
         c.setFont("Courier", 14)
@@ -835,4 +834,5 @@ class ExportPDFView(APIView):
         c.showPage()
         c.save()
         buffer.seek(0)
-        return FileResponse(buffer, as_attachment=True, filename='hello.pdf')
+        return FileResponse(buffer, as_attachment=True, filename='{} Form.pdf'.format(
+            FormEquipment.objects.get(forms_id=answer_list[0].form.id).equipments.room.room_name))
