@@ -3,9 +3,13 @@ from io import BytesIO
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from PIL import Image
 from django.db.models import Count
-from django.http import Http404, FileResponse
+from django.http import Http404, FileResponse, HttpResponse
 from reportlab.lib import colors
-from reportlab.platypus import Table, TableStyle
+from reportlab.lib.enums import TA_CENTER
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+from reportlab.lib.units import cm, inch
+from reportlab.platypus import Table, TableStyle, SimpleDocTemplate, Paragraph, Spacer
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -21,7 +25,7 @@ from a_account.models import User
 from rest_framework import status
 from sys import getsizeof
 # create pdf
-from reportlab.pdfgen import canvas
+from reportlab import platypus
 
 
 def remove_first_end_spaces(string):
@@ -565,6 +569,7 @@ class AnswerView(APIView):
                     "answer_text": answer.answer_text,
                     "image": image,
                     "signature": signature,
+                    "unique_id": answer.unique_id.id,
                     "created_by": {
                         "id": answer.created_by_id,
                         "username": answer.created_by.username
@@ -573,9 +578,9 @@ class AnswerView(APIView):
                     "form_name": answer.form.form_name,
                     "equipment_id": equipment.id,
                     "equipment_code": equipment.equipment_code,
-                    "equipment_name": equipment.equipment_name,
+                    "equipment_name": equipment.equipment_name.replace("_", " "),
                     "room_id": equipment.room.id,
-                    "room_name": equipment.room.room_name,
+                    "room_name": equipment.room.room_name.replace("_", " "),
                     "room_location": equipment.room.location,
                     "question_id": question.id,
                     "question_text": question.question_text,
@@ -646,12 +651,18 @@ class AnswerDetailView(APIView):
         answer_question = AnswerQuestion.objects.get(answers=answer)
         question = Question.objects.get(id=answer_question.questions.id)
         image = ""
+        if answer.signature:
+            signature = answer.signature.url
+        else:
+            signature = ""
         if answer.image:
             image = answer.image.url
         response = {
             "id": answer.id,
             "answer_text": answer.answer_text,
             "image": image,
+            "signature": signature,
+            "unique_id": answer.unique_id,
             "created_by": {
                 "id": answer.created_by_id,
                 "username": answer.created_by.username
@@ -660,9 +671,9 @@ class AnswerDetailView(APIView):
             "form_name": answer.form.form_name,
             "equipment_id": equipment.id,
             "equipment_code": equipment.equipment_code,
-            "equipment_name": equipment.equipment_name,
+            "equipment_name": equipment.equipment_name.replace("_", " "),
             "room_id": equipment.room.id,
-            "room_name": equipment.room.room_name,
+            "room_name": equipment.room.room_name.replace("_", " "),
             "room_location": equipment.room.location,
             "question_text": question.question_text,
             "is_active": answer.is_active,
@@ -818,42 +829,48 @@ class ExportPDFView(APIView):
                 {
                     "room_id": formEquipment.equipments.room.id,
                     "room_name": formEquipment.equipments.room.room_name,
-                    "use": a.id
+                    "use": a.created_by
                 }
             )
         buffer = io.BytesIO()
-        c = canvas.Canvas(buffer)
-        c.setFont("Courier", 32)
-        c.drawCentredString(300, 800, '{} Form'.format(
-            FormEquipment.objects.get(forms_id=answer_list[0].form.id).equipments.room.room_name).replace("_", " "))
-        c.setFont("Courier", 16)
-        c.drawString(100, 770, 'This Inspected By: {}'.format(answer_list[0].created_by))
-        c.drawString(100, 740, 'Equipment: ')
-        c.setFont("Courier", 14)
+        elements = []
+        elements.append(Paragraph(
+            "{} From".format(FormEquipment.objects.get(forms_id=answer_list[0].form.id).equipments.room.room_name).replace("_", " "),
+        ))
+        elements.append(Spacer(1, 0.2 * inch))
+        elements.append(Paragraph('Room Name (Location) : {}, {}'.format(FormEquipment.objects.get(
+            forms_id=answer_list[0].form.id).equipments.room.room_name, FormEquipment.objects.get(
+            forms_id=answer_list[0].form.id).equipments.room.location).replace("_", " "), style=))
+        elements.append(Spacer(1, 0.2 * inch))
+        elements.append(Paragraph('Inspector : {}'.format(answer_list[0].created_by)))
+        data = [[None] * 4] * (answer_list.count() + 1)
+        data[0] = ['Equipment Item', 'Normal', 'Defects', 'Follow Up Action']
+
         for a in range(0, answer_list.count()):
             formEquipment = FormEquipment.objects.get(forms_id=answer_list[a].form.id)
             answerQuestion = AnswerQuestion.objects.get(answers_id=answer_list[a].id)
-            c.drawString(120, 720 - a * 20, '{}'.format(formEquipment.equipments.equipment_name))
-            c.drawString(420, 720 - a * 20, '{}'.format(answerQuestion.questions.question_text))
-
-        data = [['00', '01', '02', '03', '04'],
-                ['10', '11', '12', '13', '14'],
-                ['20', '21', '22', '23', '24'],
-                ['30', '31', '32', '33', '34']]
-        f = Table(data)
-        f.setStyle(TableStyle([('BACKGROUND', (1, 1), (-2, -2),
-                                colors.green),
-                               ('TEXTCOLOR', (0, 0), (1, -1), colors.red)]))
-
-        width = 400
-        height = 100
-        x = 100
-        y = 800
-        table = Table(data)
-        table.wrapOn(c, width, height)
-        table.drawOn(c, x, y)
-        c.showPage()
-        c.save()
+            data[a + 1] = [formEquipment.equipments.equipment_name.replace("_", " "),
+                           'Y' if answerQuestion.questions.question_text == "Normal ?" else " ",
+                           'Y' if answerQuestion.questions.question_text == "Defects ?" else " ",
+                           answerQuestion.answers.answer_text if answerQuestion.questions.question_text == "Follow up actions ?" else " "]
+        table = Table(data, colWidths=100)
+        table.setStyle(TableStyle([
+            ('INNERGRID', (0, 0), (-1, -1), .25, colors.black),
+            ('BOX', (0, 0), (-1, -1), .25, colors.black),
+            ('BACKGROUND', (0, 0), (-1, -len(data)), colors.lightgrey),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE')
+        ]))
+        elements.append(Spacer(1, 0.2 * inch))
+        elements.append(table)
+        image = platypus.Image(answer_list[0].signature, width=200, height=200)
+        elements.append(Spacer(1, 0.2 * inch))
+        elements.append(Paragraph("signature"))
+        elements.append(Spacer(1, 0.2 * inch))
+        elements.append(image)
+        doc = SimpleDocTemplate(buffer, pagesize=A4, leftMargin=2.2 * cm, rightMargin=2.2 * cm,
+                                topMargin=1.5 * cm, bottomMargin=2.5 * cm)
+        doc.build(elements)
         buffer.seek(0)
         return FileResponse(buffer, as_attachment=True, filename='{} Form.pdf'.format(
             FormEquipment.objects.get(forms_id=answer_list[0].form.id).equipments.room.room_name))
