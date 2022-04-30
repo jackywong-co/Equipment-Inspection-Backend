@@ -4,6 +4,8 @@ from django.core.files.uploadedfile import InMemoryUploadedFile
 from PIL import Image
 from django.db.models import Count
 from django.http import Http404, FileResponse
+from reportlab.lib import colors
+from reportlab.platypus import Table, TableStyle
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -574,6 +576,7 @@ class AnswerView(APIView):
                     "equipment_name": equipment.equipment_name,
                     "room_id": equipment.room.id,
                     "room_name": equipment.room.room_name,
+                    "room_location": equipment.room.location,
                     "question_id": question.id,
                     "question_text": question.question_text,
                     "is_active": answer.is_active,
@@ -660,6 +663,7 @@ class AnswerDetailView(APIView):
             "equipment_name": equipment.equipment_name,
             "room_id": equipment.room.id,
             "room_name": equipment.room.room_name,
+            "room_location": equipment.room.location,
             "question_text": question.question_text,
             "is_active": answer.is_active,
             "created_at": answer.created_at.strftime("%Y-%m-%d %H:%M:%S")
@@ -821,7 +825,7 @@ class ExportPDFView(APIView):
         c = canvas.Canvas(buffer)
         c.setFont("Courier", 32)
         c.drawCentredString(300, 800, '{} Form'.format(
-            FormEquipment.objects.get(forms_id=answer_list[0].form.id).equipments.room.room_name))
+            FormEquipment.objects.get(forms_id=answer_list[0].form.id).equipments.room.room_name).replace("_", " "))
         c.setFont("Courier", 16)
         c.drawString(100, 770, 'This Inspected By: {}'.format(answer_list[0].created_by))
         c.drawString(100, 740, 'Equipment: ')
@@ -831,6 +835,23 @@ class ExportPDFView(APIView):
             answerQuestion = AnswerQuestion.objects.get(answers_id=answer_list[a].id)
             c.drawString(120, 720 - a * 20, '{}'.format(formEquipment.equipments.equipment_name))
             c.drawString(420, 720 - a * 20, '{}'.format(answerQuestion.questions.question_text))
+
+        data = [['00', '01', '02', '03', '04'],
+                ['10', '11', '12', '13', '14'],
+                ['20', '21', '22', '23', '24'],
+                ['30', '31', '32', '33', '34']]
+        f = Table(data)
+        f.setStyle(TableStyle([('BACKGROUND', (1, 1), (-2, -2),
+                                colors.green),
+                               ('TEXTCOLOR', (0, 0), (1, -1), colors.red)]))
+
+        width = 400
+        height = 100
+        x = 100
+        y = 800
+        table = Table(data)
+        table.wrapOn(c, width, height)
+        table.drawOn(c, x, y)
         c.showPage()
         c.save()
         buffer.seek(0)
