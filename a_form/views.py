@@ -3,9 +3,8 @@ from io import BytesIO
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from PIL import Image
 from django.db.models import Count
-from django.http import Http404, FileResponse, HttpResponse
+from django.http import Http404, FileResponse
 from reportlab.lib import colors
-from reportlab.lib.enums import TA_CENTER
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import cm, inch
@@ -835,12 +834,14 @@ class ExportPDFView(APIView):
         buffer = io.BytesIO()
         elements = []
         elements.append(Paragraph(
-            "{} From".format(FormEquipment.objects.get(forms_id=answer_list[0].form.id).equipments.room.room_name).replace("_", " "),
+            "{} From".format(
+                FormEquipment.objects.get(forms_id=answer_list[0].form.id).equipments.room.room_name).replace("_", " "),
         ))
         elements.append(Spacer(1, 0.2 * inch))
+
         elements.append(Paragraph('Room Name (Location) : {}, {}'.format(FormEquipment.objects.get(
             forms_id=answer_list[0].form.id).equipments.room.room_name, FormEquipment.objects.get(
-            forms_id=answer_list[0].form.id).equipments.room.location).replace("_", " "), style=))
+            forms_id=answer_list[0].form.id).equipments.room.location).replace("_", " ")))
         elements.append(Spacer(1, 0.2 * inch))
         elements.append(Paragraph('Inspector : {}'.format(answer_list[0].created_by)))
         data = [[None] * 4] * (answer_list.count() + 1)
@@ -869,7 +870,7 @@ class ExportPDFView(APIView):
         elements.append(Spacer(1, 0.2 * inch))
         elements.append(image)
         doc = SimpleDocTemplate(buffer, pagesize=A4, leftMargin=2.2 * cm, rightMargin=2.2 * cm,
-                                topMargin=1.5 * cm, bottomMargin=2.5 * cm)
+                                topMargin=1.5 * cm, bottomMargin=2.5 * cm, title="Form")
         doc.build(elements)
         buffer.seek(0)
         return FileResponse(buffer, as_attachment=True, filename='{} Form.pdf'.format(
