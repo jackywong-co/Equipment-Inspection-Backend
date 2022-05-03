@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from rest_framework.response import Response
 from rest_framework.parsers import FormParser, MultiPartParser
 from a_api.permissions import ManagerPermission
-from a_form.models import Equipment, Room
+from a_form.models import Equipment
 
 data_dir = './media/image/equipment'
 batch_size = 32
@@ -19,7 +19,6 @@ class TrainingView(APIView):
     parser_classes = [MultiPartParser, FormParser]
 
     def post(self, request):
-        # print(data_dir)
         train_ds = tf.keras.utils.image_dataset_from_directory(
             data_dir,
             validation_split=0.2,

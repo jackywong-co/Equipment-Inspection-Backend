@@ -5,6 +5,7 @@ from PIL import Image
 from django.db.models import Count
 from django.http import Http404, FileResponse
 from reportlab.lib import colors
+from reportlab.lib.enums import TA_LEFT
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import cm, inch
@@ -130,7 +131,6 @@ class RoomDetailView(APIView):
                 }
             )
         return Response(
-            [
                 {
                     "id": room.id,
                     "room_name": room.room_name.replace("_", " "),
@@ -138,7 +138,6 @@ class RoomDetailView(APIView):
                     "equipments": equipment_arr,
                     "is_active": room.is_active
                 }
-            ]
         )
 
     def put(self, request, pk):
@@ -661,7 +660,7 @@ class AnswerDetailView(APIView):
             "answer_text": answer.answer_text,
             "image": image,
             "signature": signature,
-            "unique_id": answer.unique_id,
+            "unique_id": answer.unique_id.id,
             "created_by": {
                 "id": answer.created_by_id,
                 "username": answer.created_by.username
@@ -828,22 +827,29 @@ class ExportPDFView(APIView):
                 {
                     "room_id": formEquipment.equipments.room.id,
                     "room_name": formEquipment.equipments.room.room_name,
-                    "use": a.created_by
+                    "use": a.created_at
                 }
             )
         buffer = io.BytesIO()
+        styles = getSampleStyleSheet()
+
         elements = []
         elements.append(Paragraph(
-            "{} From".format(
-                FormEquipment.objects.get(forms_id=answer_list[0].form.id).equipments.room.room_name).replace("_", " "),
+            "{}".format(
+                answer_list[0].created_at.strftime("%Y-%m-%d")
+            ), style=styles["Title"]
         ))
         elements.append(Spacer(1, 0.2 * inch))
 
         elements.append(Paragraph('Room Name (Location) : {}, {}'.format(FormEquipment.objects.get(
             forms_id=answer_list[0].form.id).equipments.room.room_name, FormEquipment.objects.get(
-            forms_id=answer_list[0].form.id).equipments.room.location).replace("_", " ")))
+            forms_id=answer_list[0].form.id).equipments.room.location).replace("_", " "), style=styles["BodyText"]))
         elements.append(Spacer(1, 0.2 * inch))
         elements.append(Paragraph('Inspector : {}'.format(answer_list[0].created_by)))
+        if answer_list[0].image:
+            image = platypus.Image(answer_list[0].image, width=150, height=150)
+            elements.append(image)
+        elements.append(Spacer(1, 0.2 * inch))
         data = [[None] * 4] * (answer_list.count() + 1)
         data[0] = ['Equipment Item', 'Normal', 'Defects', 'Follow Up Action']
 
@@ -864,11 +870,12 @@ class ExportPDFView(APIView):
         ]))
         elements.append(Spacer(1, 0.2 * inch))
         elements.append(table)
-        image = platypus.Image(answer_list[0].signature, width=200, height=200)
         elements.append(Spacer(1, 0.2 * inch))
-        elements.append(Paragraph("signature"))
+        elements.append(Paragraph("Signature"))
         elements.append(Spacer(1, 0.2 * inch))
-        elements.append(image)
+        signature = platypus.Image(answer_list[0].signature, width=200, height=100)
+        elements.append(signature)
+
         doc = SimpleDocTemplate(buffer, pagesize=A4, leftMargin=2.2 * cm, rightMargin=2.2 * cm,
                                 topMargin=1.5 * cm, bottomMargin=2.5 * cm, title="Form")
         doc.build(elements)
