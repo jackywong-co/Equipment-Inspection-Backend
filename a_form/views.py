@@ -131,13 +131,13 @@ class RoomDetailView(APIView):
                 }
             )
         return Response(
-                {
-                    "id": room.id,
-                    "room_name": room.room_name.replace("_", " "),
-                    "location": room.location,
-                    "equipments": equipment_arr,
-                    "is_active": room.is_active
-                }
+            {
+                "id": room.id,
+                "room_name": room.room_name.replace("_", " "),
+                "location": room.location,
+                "equipments": equipment_arr,
+                "is_active": room.is_active
+            }
         )
 
     def put(self, request, pk):
@@ -543,7 +543,6 @@ class QuestionDetailView(APIView):
 
 class AnswerView(APIView):
     permission_classes = [ManagerPermission]
-    parser_classes = [MultiPartParser, FormParser]
 
     def get(self, request):
         answer_all = Answer.objects.all()
@@ -634,7 +633,6 @@ class AnswerView(APIView):
 
 class AnswerDetailView(APIView):
     permission_classes = [ManagerPermission]
-    parser_classes = [MultiPartParser, FormParser]
 
     def get_object(self, pk):
         try:
@@ -695,7 +693,6 @@ class AnswerDetailView(APIView):
 
 class EquipmentToFromView(APIView):
     permission_classes = [ManagerPermission]
-    parser_classes = [MultiPartParser, FormParser]
 
     def get_object(self, pk):
         try:
@@ -740,8 +737,6 @@ class EquipmentToFromView(APIView):
 
 
 class RoomToFromView(APIView):
-    permission_classes = [ManagerPermission]
-    parser_classes = [MultiPartParser, FormParser]
 
     def get_object(self, pk):
         try:
@@ -788,8 +783,6 @@ class RoomToFromView(APIView):
 
 
 class ListReport(APIView):
-    permission_classes = [ManagerPermission]
-    parser_classes = [MultiPartParser, FormParser]
 
     def get(self, request):
         lists = (Answer.objects.values('unique_id_id').annotate(dcount=Count('unique_id_id'))).order_by()
@@ -808,8 +801,6 @@ class ListReport(APIView):
 
 
 class ExportPDFView(APIView):
-    permission_classes = [ManagerPermission]
-    parser_classes = [MultiPartParser, FormParser]
 
     def get_object(self, pk):
         try:
